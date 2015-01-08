@@ -38,7 +38,10 @@ module.exports = function(grunt) {
       }
     },
     jshint: {
-      all: ['Gruntfile.js', 'src/**/*.js']
+      all: ['Gruntfile.js', 'src/**/*.js'],
+      options: {
+        jshintrc: '.jshintrc'
+      }
     }
   });
 

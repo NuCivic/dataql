@@ -56,7 +56,7 @@
   "immed": true,
 
   // Prohibits the use of arguments.caller and arguments.callee
-  "noarg": true
+  "noarg": true,
 
   /*
    * RELAXING OPTIONS
