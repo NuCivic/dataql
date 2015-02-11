@@ -1,22 +1,23 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents** 
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [DataQL](#dataql)
+    - [Quick start](#quick-start)
     - [Create a dataset](#create-a-dataset)
-    - [select](#select)
-    - [from](#from)
-    - [order](#order)
-    - [where](#where)
-    - [limit](#limit)
-    - [rename](#rename)
-    - [aggregate](#aggregate)
+    - [Select fields (select)](#select-fields-select)
+    - [Configure dataset (from)](#configure-dataset-from)
+    - [Ordering results (order)](#ordering-results-order)
+    - [Filter results (where)](#filter-results-where)
+    - [Limiting results (limit)](#limiting-results-limit)
+    - [Renaming fields (rename)](#renaming-fields-rename)
+    - [Statistics! (aggregate)](#statistics-aggregate)
       - [sum](#sum)
-      - [avg](#avg)
-      - [percentage](#percentage)
-      - [count](#count)
-      - [max](#max)
-      - [min](#min)
+      - [Average (avg)](#average-avg)
+      - [Percentage (percentage)](#percentage-percentage)
+      - [Count things (count)](#count-things-count)
+      - [Getting max field value (max)](#getting-max-field-value-max)
+      - [Getting max field value (min)](#getting-max-field-value-min)
     - [Remote queries](#remote-queries)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -32,12 +33,12 @@ Often working with visualization involves manipulate data somehow. DataQL provid
 Just add this dependencies:
 
 ```html
-  <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-  <script src="
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="
 https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.1.0/lodash.js"></script>
-  <script src="
+<script src="
 https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
-  <script src="https://raw.githubusercontent.com/NuCivic/dataql/master/dist/dataql.min.js"></script>
+<script src="https://raw.githubusercontent.com/NuCivic/dataql/master/dist/dataql.min.js"></script>
 ```
 
 Backbone and jquery dependencies will be removed in the future. However lodash / underscore will be preserved.
@@ -59,7 +60,7 @@ dataset = [
 /* jshint ignore:end */
 ```
 
-### select
+### Select fields (select)
 To select what fields you want to list in your results you just have to pass it as arguments to select function. 
 
 ```javascript
@@ -68,10 +69,10 @@ var q = select('country', 'title', 'date')
     .execute();
 ```
 
-### from
+### Configure dataset (from)
 Remember that you need a dataset to select field from. In order to do that you need to pass a dataset as parameter to the from function.
 
-### order
+### Ordering results (order)
 Order function allow you pass a predicate as argument to order the dataset. In the following example we order the dataset by id descendent.
 
 ```javascript
@@ -84,7 +85,7 @@ var q = select('country', 'title', 'date', 'id')
   .execute();
 ```
 
-### where
+### Filter results (where)
 Where function is intended to filter those rows we don't want in the result.
 In this case we are only getting all the rows where country is equal to `UK`.
 
@@ -101,7 +102,7 @@ var q = select('country', 'title', 'date', 'id')
   .execute();
 ```
 
-### limit
+### Limiting results (limit)
 You can limit the amount of results usign the limit function. It receive two params: the index where start and the number of rows to retrieve.
 
 ``` 
@@ -122,7 +123,7 @@ var q = select('country', 'title', 'date', 'id')
   .execute();
 ```
 
-### rename
+### Renaming fields (rename)
 Sometimes we need to change the name's field of each row. To achive that you can invoke the rename function passing a mapping object as argument.
 
 ```javascript
@@ -140,7 +141,7 @@ var q = select('country', 'title', 'date', 'id')
   .execute();
 ```
 
-### aggregate
+### Statistics! (aggregate)
 Aggregate functions perform a calculation on the set of values and returns either an scalar (if you don't use group function) or a result dataset (using group function).
 
 #### sum
@@ -160,7 +161,7 @@ var q = select('country')
   .group('country')
   .execute();  
 ```
-#### avg
+#### Average (avg)
 Retrive the average of a field.
 
 ```javascript
@@ -178,7 +179,7 @@ var q = select('country')
   .execute();  
 ```
 
-#### percentage
+#### Percentage (percentage)
 Retrive the percentage of a field grouped by the argument of the group function. This function does not return scalar values.
 
 ```javascript
@@ -190,7 +191,7 @@ var q = select('country')
   .execute();  
 ```
 
-#### count
+#### Count things (count)
 Count the number of results.
 
 ```javascript
@@ -208,7 +209,7 @@ var q = select('country')
   .execute();    
 ```
 
-#### max
+#### Getting max field value (max)
 Get the max of a field.
 ```javascript
 // Returns max y for each country.
@@ -225,7 +226,7 @@ var q = select('country')
   .execute();    
 ```
 
-#### min
+####  Getting max field value (min)
 Get the min of a field.
 
 ```javascript
@@ -263,6 +264,7 @@ select('country')
     console.log(data)
   });
 ```
+
 To run a query against a remote datasource you have to pass and object as argument to the from function and set a callback in the execute function.
 
 
