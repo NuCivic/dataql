@@ -67,7 +67,8 @@
   "globals": {
     "$": false,
     "jQuery": false,
-    "_": false
+    "_": false,
+    "select":false
   },
   // Suppress warnings about == null comparisons.
   "eqnull": true
