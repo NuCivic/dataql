@@ -1,10 +1,31 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents** 
+
+- [DataQL](#dataql)
+    - [Create a dataset](#create-a-dataset)
+    - [select](#select)
+    - [from](#from)
+    - [order](#order)
+    - [where](#where)
+    - [limit](#limit)
+    - [rename](#rename)
+    - [aggregate](#aggregate)
+      - [sum](#sum)
+      - [avg](#avg)
+      - [percentage](#percentage)
+      - [count](#count)
+      - [max](#max)
+      - [min](#min)
+    - [Remote queries](#remote-queries)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 DataQL
 ===============================================================================
-DataQL bring most used sql features to javascript in order to manipulate data. 
+DataQL bring most useful sql features to javascript in order to manipulate data. 
 
 Often working with visualization involves manipulate data somehow. DataQL provide some useful function to transform using what you know about SQL.
-
-## Getting started
 
 ### Create a dataset
 ```javascript
@@ -219,5 +240,27 @@ var q = select('country')
   .aggregate({field:'y', method: 'min'})
   .execute();    
 ```
+
+
+### Remote queries
+You could run queries against remote backends using recline backends. Currently we support this backends:
+- CSV
+- GDocs
+- CKAN
+- ElasticSearch
+
+```javascript
+select('country')
+  .from({
+    url: 'https://docs.google.com/spreadsheet/ccc?key=0Aon3JiuouxLUdGZPaUZsMjBxeGhfOWRlWm85MmV0UUE#gid=0',
+    backend: 'gdocs'
+  })
+  .aggregate({field:'y', method: 'avg'})
+  .group('country')
+  .execute(function(data){ 
+    console.log(data)
+  });
+```
+To run a query against a remote datasource you have to pass and object as argument to the from function and set a callback in the execute function.
 
 
