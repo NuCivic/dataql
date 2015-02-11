@@ -270,7 +270,11 @@
       var awaitData = new recline.Model.Dataset(self.dataset);
       awaitData
       .fetch()
+      .fail(function(err){
+        console.log(err);
+      })
       .done(function(data){
+        console.log(data);
         self.dataset = data.records.toJSON();
         cb(self.execute());
       });

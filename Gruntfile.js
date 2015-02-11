@@ -8,7 +8,7 @@ module.exports = function(grunt) {
         separator: ';'
       },
       dist: {
-        src: ['src/**/*.js'],
+        src: ['src/**/*.js', 'lib/**/*.js'],
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
@@ -17,7 +17,7 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> v0.1 */\n'
       },
       build: {
-        src: ['src/**/*.js'],
+        src: ['src/**/*.js', 'lib/**/*.js'],
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
