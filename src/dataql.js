@@ -261,11 +261,21 @@
     return self;
   };
 
-  DataQL.prototype.execute = function(){
+  DataQL.prototype.execute = function(cb){
     var self = this;
     self.result = (self.groupStament)? {} : [];
     self.scalar = self._aggregate.length && !self.groupStament;
 
+    if(!_.isArray(self.dataset) && _.isObject(self.dataset)){
+      var awaitData = new recline.Model.Dataset(self.dataset);
+      awaitData
+      .fetch()
+      .done(function(data){
+        self.dataset = data.records.toJSON();
+        cb(self.execute());
+      });
+      return;
+    }
     // Filter results by where predicate.
     self._filteredDataset = (self.whereStament)?
       _.filter(self.dataset, self.whereStament)

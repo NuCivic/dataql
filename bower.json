@@ -1,7 +1,7 @@
 {
   "name": "dataql",
   "version": "0.0.1",
-  "keywords": [ ],
+  "keywords": [],
   "license": "MIT",
   "ignore": [
     "**/.*",
@@ -11,8 +11,10 @@
     "tests"
   ],
   "dependencies": {
-    "lodash": "*",
+    "lodash": "~3.1.0",
     "lodash.data": "https://github.com/NuCivic/lodash.data.git",
-    "bootstrap-css": "2.3.2"
+    "bootstrap-css": "2.3.2",
+    "jquery": "2.1.3",
+    "backbone": "1.1.2"
   }
 }
