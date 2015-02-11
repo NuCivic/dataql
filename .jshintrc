@@ -68,7 +68,8 @@
     "$": false,
     "jQuery": false,
     "_": false,
-    "select":false
+    "select":false,
+    "recline": false
   },
   // Suppress warnings about == null comparisons.
   "eqnull": true
