@@ -38,7 +38,7 @@ Just add this dependencies:
 https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.1.0/lodash.js"></script>
 <script src="
 https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
-<script src="https://raw.githubusercontent.com/NuCivic/dataql/master/dist/dataql.min.js"></script>
+<script src="http://rawgit.com/NuCivic/dataql/master/dist/dataql.min.js"></script>
 ```
 
 Backbone and jquery dependencies will be removed in the future. However lodash / underscore will be preserved.
@@ -267,4 +267,11 @@ select('country')
 
 To run a query against a remote datasource you have to pass and object as argument to the from function and set a callback in the execute function.
 
+### To-Do
+- Concat fields
+- Joins
+- Remove backbone dependency
+- Remove jquery dependency
+- Remove recline dependency
+- Parece big files
 
