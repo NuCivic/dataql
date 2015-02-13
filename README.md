@@ -270,6 +270,7 @@ To run a query against a remote datasource you have to pass and object as argume
 ### To-Do
 - Concat fields
 - Joins
+- Joins from multiple resources (a csv with a google spreadsheet)
 - Remove backbone dependency
 - Remove jquery dependency
 - Remove recline dependency

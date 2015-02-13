@@ -38,6 +38,7 @@
 
     self._select = [];
     self._aggregate = [];
+    self._join = [];
   }
 
   DataQL.fn = {};
@@ -219,6 +220,13 @@
     }
   };
 
+  DataQL.prototype.join = function(backend) {
+    var self = this;
+    var jn = backend;
+    self._join.push(jn);
+    return self;
+  };
+
   DataQL.prototype.group = function(fieldName) {
     var self = this;
     self.groupStament = fieldName;
@@ -266,78 +274,121 @@
     self.result = (self.groupStament)? {} : [];
     self.scalar = self._aggregate.length && !self.groupStament;
 
-    if(!_.isArray(self.dataset) && _.isObject(self.dataset)){
-      var awaitData = new recline.Model.Dataset(self.dataset);
-      awaitData
-      .fetch()
-      .fail(function(err){
-        console.log(err);
-      })
-      .done(function(data){
-        console.log(data);
-        self.dataset = data.records.toJSON();
-        cb(self.execute());
-      });
-      return;
-    }
-    // Filter results by where predicate.
-    self._filteredDataset = (self.whereStament)?
-      _.filter(self.dataset, self.whereStament)
-      : self.dataset;
+    // self.dataset = (_.isArray(self.dataset)) ?
+    //   {records: self.dataset}
+    //   : self.dataset;
 
-    // If not an scalar.
-    if(!self.scalar){
-      _.each(self._filteredDataset, function(row, index){
-        var key = (self.groupStament)? row[self.groupStament] : index;
+    // Fetching resources.
+    return self._fetchResources(function(err, data){
 
-        _.each(self._select, function(select){
-          var getValue = _.values(select)[0];
-          var fieldName = _.keys(select)[0];
+      // Filter results by where predicate.
+      self._filteredDataset = (self.whereStament)?
+        _.filter(data, self.whereStament)
+        : data;
 
-          // Create slot if not exists.
-          self.result[key] = self.result[key] || {};
+      // If not an scalar.
+      if(!self.scalar){
+        _.each(self._filteredDataset, function(row, index){
+          var key = (self.groupStament)? row[self.groupStament] : index;
 
-          // Applying function to get value.
-          self.result[key][fieldName] = getValue(row);
+          _.each(self._select, function(select){
+            var getValue = _.values(select)[0];
+            var fieldName = _.keys(select)[0];
+
+            // Create slot if not exists.
+            self.result[key] = self.result[key] || {};
+
+            // Applying function to get value.
+            self.result[key][fieldName] = getValue(row);
+          });
+        });
+      }
+
+      // Renaming fields
+      _.each(self.result, function(item, key){
+        _.each(self.renameStament, function(mappings){
+          self.result[key] = _.rename(item, mappings);
         });
       });
-    }
 
-    // Renaming fields
-    _.each(self.result, function(item, key){
-      _.each(self.renameStament, function(mappings){
-        self.result[key] = _.rename(item, mappings);
+      // Run aggregations here. Side effects?
+      var aggData = {};
+
+      _.each(self._aggregate, function(aggregation){
+        var data = self._runAggregation(data, aggregation);
+        _.merge(aggData, data);
+      });
+
+      if(self.scalar){
+        self.result = aggData;
+        self.result = aggData;
+         return cb && cb(err, self.result);
+      } else {
+        _.merge(self.result, aggData);
+        self.result =_.values(self.result);
+      }
+
+      // Order results by orderStament.
+      self.result = (self.orderStament)?
+        _.sortBy(self.result, self.orderStament)
+        : self.result;
+
+      // Limit result accordingly limitStament.
+      self.result = (self.limitStament)?
+        self.result.slice.apply(self.result, self.limitStament)
+        : self.result;
+
+      cb && cb(err, self.result);
+    });
+
+
+  };
+
+  DataQL.prototype._fetchResources = function(cb){
+    var self = this;
+    var promises = [];
+
+    var fromDataset = new recline.Model.Dataset(self.dataset);
+    promises.push(fromDataset.fetch());
+
+    _.each(self._join, function(options){
+      var backend = new recline.Model.Dataset(options);
+      promises.push(backend.fetch());
+    });
+
+    return $.when.apply($, promises)
+      .fail(function(err){
+        cb(err, null);
+      })
+      .done(function(){
+        self._joinResources(_.toArray(arguments));
+        cb(null, _.first(_.toArray(arguments)).records.toJSON());
+      });
+  };
+
+  DataQL.prototype._joinResources = function(resources){
+    var self = this;
+    var result = [];
+
+    var from = _.first(_.reject(resources, self._isJoin));
+    var joins = _.filter(resources, self._isJoin);
+    result = from.records.toJSON();
+
+    _.each(joins, function(dataset){
+      _.each(dataset.records.toJSON(), function(rowb){
+        _.each(result, function(rowa){
+
+          if(dataset.get('where')(rowa, rowb)){
+            console.log(rowa.country, rowb.country);
+          }
+        });
       });
     });
 
-    // Run aggregations here. Side effects?
-    var aggData = {};
+  };
 
-    _.each(self._aggregate, function(aggregation){
-      var data = self._runAggregation(self.dataset, aggregation);
-      _.merge(aggData, data);
-    });
-
-    if(self.scalar){
-      self.result = aggData;
-      self.result = aggData;
-      return self.result;
-    } else {
-      _.merge(self.result, aggData);
-      self.result =_.values(self.result);
-    }
-
-    // Order results by orderStament.
-    self.result = (self.orderStament)?
-      _.sortBy(self.result, self.orderStament)
-      : self.result;
-
-    // Limit result accordingly limitStament.
-    self.result = (self.limitStament)?
-      self.result.slice.apply(self.result, self.limitStament)
-      : self.result;
-
-    return self.result;
+  DataQL.prototype._isJoin = function(dataset){
+    return typeof dataset.get('where') !== 'undefined';
   };
 
   // Returns an array of objects.
