@@ -1,0 +1,10 @@
+var d = {url:url, backend:'csv'};
+
+- queue resources
+- download them
+- convert to collections
+- join them usign where function
+
+.join(d, function(rowa, rowb){
+	return rowa.id == rowb.id;
+})
