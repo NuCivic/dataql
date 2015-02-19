@@ -65,7 +65,7 @@ To select what fields you want to list in your results you just have to pass it 
 
 ```javascript
 var q = select('country', 'title', 'date')
-    .from(dataset)
+    .from({records: dataset})
     .execute();
 ```
 
@@ -78,7 +78,7 @@ Order function allow you pass a predicate as argument to order the dataset. In t
 ```javascript
 // Get UK order by id.
 var q = select('country', 'title', 'date', 'id')
-  .from(dataset)
+  .from({records: dataset})
   .order(function(row){
     return -row.id;
   })
@@ -92,7 +92,7 @@ In this case we are only getting all the rows where country is equal to `UK`.
 ```javascript
 // Get UK order by id.
 var q = select('country', 'title', 'date', 'id')
-  .from(dataset)
+  .from({records: dataset})
   .where(function(row){
     return row.country === 'UK';
   })  
@@ -112,7 +112,7 @@ limit(start, numberOfRows);
 ```javascript
 // Get UK order by id.
 var q = select('country', 'title', 'date', 'id')
-  .from(dataset)
+  .from({records: dataset})
   .where(function(row){
     return row.country === 'UK';
   })  
@@ -129,7 +129,7 @@ Sometimes we need to change the name's field of each row. To achive that you can
 ```javascript
 // Get UK order by id.
 var q = select('country', 'title', 'date', 'id')
-  .from(dataset)
+  .from({records: dataset})
   .where(function(row){
     return row.country === 'UK';
   })
@@ -150,13 +150,13 @@ Retrive a sum of a field.
 ```javascript
 // Returns an scalar
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'sum', as:'total'})
   .execute();
 
 // Returns a dataset grouped by country
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'sum', as:'total'})
   .group('country')
   .execute();  
@@ -167,13 +167,13 @@ Retrive the average of a field.
 ```javascript
 // Returns an scalar
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'avg'})
   .execute();
 
 // Returns a dataset grouped by country
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'avg'})
   .group('country')
   .execute();  
@@ -185,7 +185,7 @@ Retrive the percentage of a field grouped by the argument of the group function.
 ```javascript
 // Return the percentage of the y field by country. 
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'percentage'})
   .group('country')
   .execute();  
@@ -197,14 +197,14 @@ Count the number of results.
 ```javascript
 // Returns the number of rows per country.
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'count'})
   .group('country')
   .execute();  
 
 // Returns the number of rows.
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'count'})
   .execute();    
 ```
@@ -214,14 +214,14 @@ Get the max of a field.
 ```javascript
 // Returns max y for each country.
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'max'})
   .group('country')
   .execute();  
 
 // Returns absoulute max y.
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'max'})
   .execute();    
 ```
@@ -232,7 +232,7 @@ Get the min of a field.
 ```javascript
 // Returns min y for each country.
 var q = select('country')
-  .from(dataset)
+  .from({records: dataset})
   .aggregate({field:'y', method: 'min'})
   .group('country')
   .execute();  
@@ -267,10 +267,32 @@ select('country')
 
 To run a query against a remote datasource you have to pass and object as argument to the from function and set a callback in the execute function.
 
+### Join
+If you need to join datasets you could do it just passing a where function that returns if the row of the A dataset should be joined with the row of the B dataset.
+
+IMPORTANT: if B dataset have fields that collision with field names of A dataset then A fields are preserved and B fields are discarded.
+
+```javascript
+select('country', 'date', 'z', 'extra')
+  .from({
+    url: 'https://docs.google.com/spreadsheet/ccc?key=0Aon3JiuouxLUdGZPaUZsMjBxeGhfOWRlWm85MmV0UUE#gid=0', // jshint ignore:line
+    backend:'gdocs'
+  })
+  .join({
+    records:dataset,
+    where: function(rowa, rowb){
+      return rowa.country.trim() === rowb.country.trim();
+    }
+  })
+  .group('country')
+  .rename({country: 'pais'})
+  .execute(function(err, data){
+    console.log(data, err);
+  });
+```
+
 ### To-Do
 - Concat fields
-- Joins
-- Joins from multiple resources (a csv with a google spreadsheet)
 - Remove backbone dependency
 - Remove jquery dependency
 - Remove recline dependency

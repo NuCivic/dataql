@@ -30,7 +30,8 @@ for(var i = 0; i < 10000; i++ ){
     country:
     country,
     lat:lat,
-    lon:lon
+    lon:lon,
+    extra:'mariano'
   });
 }
 
@@ -121,18 +122,15 @@ for(var i = 0; i < 10000; i++ ){
 //   });
 
 
-var k = select('country', 'date')
+select('country', 'date', 'z', 'extra')
   .from({
-    url: 'https://docs.google.com/spreadsheet/ccc?key=0Aon3JiuouxLUdGZPaUZsMjBxeGhfOWRlWm85MmV0UUE#gid=0',
+    url: 'https://docs.google.com/spreadsheet/ccc?key=0Aon3JiuouxLUdGZPaUZsMjBxeGhfOWRlWm85MmV0UUE#gid=0', // jshint ignore:line
     backend:'gdocs'
   })
   .join({
     records:dataset,
     where: function(rowa, rowb){
-      console.log(rowa.country, rowb.country, rowa.country === rowb.country);
-      console.log(typeof rowa.country);
-      console.log(typeof rowb.country);
-      return rowa.country === rowb.country;
+      return rowa.country.trim() === rowb.country.trim();
     }
   })
   .group('country')
@@ -140,3 +138,4 @@ var k = select('country', 'date')
   .execute(function(err, data){
     console.log(data, err);
   });
+

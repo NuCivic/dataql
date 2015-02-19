@@ -1,3 +1,5 @@
+/*jshint -W030 */
+
 ;(function(global){
   'use strict';
 
@@ -26,6 +28,13 @@
     },
     construct: function(head, tail){
       return _.cat([head], _.toArray(tail));
+    },
+    trim: function(str){
+      var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+      return str.replace(rtrim, '');
+    },
+    fdefaults: function(){
+      return _.defaults.apply(_, _.construct({}, _.toArray(arguments)));
     }
   });
 
@@ -361,8 +370,7 @@
         cb(err, null);
       })
       .done(function(){
-        self._joinResources(_.toArray(arguments));
-        cb(null, _.first(_.toArray(arguments)).records.toJSON());
+        cb(null, self._joinResources(_.toArray(arguments)));
       });
   };
 
@@ -374,17 +382,23 @@
     var joins = _.filter(resources, self._isJoin);
     result = from.records.toJSON();
 
+    // for each join function.
     _.each(joins, function(dataset){
+
+      // for each record in the B table.
       _.each(dataset.records.toJSON(), function(rowb){
+
+        // for each record in the A table.
         _.each(result, function(rowa){
 
+          // Filter with join where function.
           if(dataset.get('where')(rowa, rowb)){
-            console.log(rowa.country, rowb.country);
+            _.extend(rowa, rowb);
           }
         });
       });
     });
-
+    return result;
   };
 
   DataQL.prototype._isJoin = function(dataset){
