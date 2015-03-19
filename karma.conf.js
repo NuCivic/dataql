@@ -15,6 +15,11 @@ module.exports = function(config) {
       'lib/papaparse.js',
       'src/dataql.js',
       'test/test.js'
-    ]
+    ],
+    client: {
+      mocha: {
+        timeout: 5000
+      }
+    }
   });
 };
