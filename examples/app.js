@@ -122,19 +122,11 @@ for(var i = 0; i < 10000; i++ ){
 //   });
 
 
-select('country', 'date', 'z', 'extra')
+select('state', 'total.foreclosures')
   .from({
-    url: 'https://docs.google.com/spreadsheet/ccc?key=0Aon3JiuouxLUdGZPaUZsMjBxeGhfOWRlWm85MmV0UUE#gid=0', // jshint ignore:line
-    backend:'gdocs'
+    url: 'http://demo.getdkan.com/sites/default/files/us_foreclosures_jan_2012_by_state_0.csv', // jshint ignore:line
+    backend:'papacsv'
   })
-  .join({
-    records:dataset,
-    where: function(rowa, rowb){
-      return rowa.country.trim() === rowb.country.trim();
-    }
-  })
-  .group('country')
-  .rename({country: 'pais'})
   .execute(function(err, data){
     console.log(data, err);
   });

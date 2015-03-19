@@ -69,7 +69,10 @@
     "jQuery": false,
     "_": false,
     "select":false,
-    "recline": false
+    "mocha":false,
+    "it":false,
+    "describe":false,
+    "expect":false
   },
   // Suppress warnings about == null comparisons.
   "eqnull": true

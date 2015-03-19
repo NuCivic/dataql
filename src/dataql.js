@@ -356,20 +356,24 @@
   DataQL.prototype._fetchResources = function(cb){
     var self = this;
     var promises = [];
+    var backend;
 
-    var fromDataset = new recline.Model.Dataset(self.dataset);
-    promises.push(fromDataset.fetch());
+    backend = _.findWhere(recline.Backend, {__type__:self.dataset.backend});
+
+    if(!backend) throw new Error('Backend not found');
+
+    promises.push(backend.fetch(self.dataset));
 
     _.each(self._join, function(options){
-      var backend = new recline.Model.Dataset(options);
-      promises.push(backend.fetch());
+      var backend = _.findWhere(recline.Backend, {__type__:options.backend});
+      promises.push(backend.fetch(options));
     });
 
     return $.when.apply($, promises)
       .fail(function(err){
         cb(err, null);
       })
-      .done(function(){
+      .done(function(data){
         cb(null, self._joinResources(_.toArray(arguments)));
       });
   };
@@ -378,21 +382,23 @@
     var self = this;
     var result = [];
 
+    self._normalizeRecordsAndFields(resources);
+
     var from = _.first(_.reject(resources, self._isJoin));
     var joins = _.filter(resources, self._isJoin);
-    result = from.records.toJSON();
+    result = from.records;
 
     // for each join function.
     _.each(joins, function(dataset){
 
       // for each record in the B table.
-      _.each(dataset.records.toJSON(), function(rowb){
+      _.each(dataset.records, function(rowb){
 
         // for each record in the A table.
         _.each(result, function(rowa){
 
           // Filter with join where function.
-          if(dataset.get('where')(rowa, rowb)){
+          if(dataset.where(rowa, rowb)){
             _.extend(rowa, rowb);
           }
         });
@@ -402,7 +408,7 @@
   };
 
   DataQL.prototype._isJoin = function(dataset){
-    return typeof dataset.get('where') !== 'undefined';
+    return _.has(dataset, 'where');
   };
 
   // Returns an array of objects.
@@ -410,5 +416,20 @@
     var self = this;
     return DataQL.fn[aggregate.method](aggregate, self._filteredDataset, self);
   };
+
+  // Plenty of side effects but optimized for big files.
+  DataQL.prototype._normalizeRecordsAndFields = function(resources){
+    for (var i = resources.length - 1; i >= 0; i--) {
+      for (var j = resources[i].records.length - 1; j >= 0; j--) {
+        if(resources[i].records[j] instanceof Array){
+          resources[i].records[j] = _.object(
+            _.invoke(resources[i].fields, 'trim'),
+            resources[i].records[j]
+          );
+        }
+      }
+    }
+  };
+
 
 })(window);
