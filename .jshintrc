@@ -72,7 +72,8 @@
     "mocha":false,
     "it":false,
     "describe":false,
-    "expect":false
+    "expect":false,
+    "recline":false
   },
   // Suppress warnings about == null comparisons.
   "eqnull": true

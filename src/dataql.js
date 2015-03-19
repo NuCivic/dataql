@@ -373,7 +373,7 @@
       .fail(function(err){
         cb(err, null);
       })
-      .done(function(data){
+      .done(function(){
         cb(null, self._joinResources(_.toArray(arguments)));
       });
   };
