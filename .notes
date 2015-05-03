@@ -8,3 +8,83 @@ var d = {url:url, backend:'csv'};
 .join(d, function(rowa, rowb){
 	return rowa.id == rowb.id;
 })
+
+
+
+crear una columna tomando los valores de N
+
+select('year')
+.from(d)
+.columnFromVector({row: 1, columns: ['A 2014', 'A 2013', 'A 2012'], as: 'Year'})
+.execute()
+
+
+
+
+BACKEND JSON prices FROM "http://dadas.com/xml.json";
+BACKEND GDOCS schools FROM "http://drive.google.com/spreadsheet/ak23kf-dh29+21";
+BACKEND CSV district FROM "http://dkan.com/district.csv";
+
+TABLES prices, schools
+JOIN prices.id = schools.id
+JOIN district.id = district.id
+FILTER COND(schools.id = 20)
+RENAME schools.id, id
+DELETE ROW 1,2, RANGE(4,20), COND(
+DELETE COLUMN schools.name,2
+ADD COLUMN year FROM COLUMN_RANGE(1,20)
+AGGREGATE SUM(prices.price) AS price // This create a price column with the sum of each price by group
+AGGREGATE AVG(prices.price) AS priceAvg
+AGGREGATE MIN(prices.price) AS minimum
+AGGREGATE MAX(prices.price) AS maximum
+AGGREGATE PERCENTAGE(prices.price) AS percentage
+GROUP BY schools.id
+SORT BY id DESC
+LIMIT 0,10
+
+
+
+COND(schools.id=20) //condition to satisfy
+RANGE(row,0,20)
+
+// Set the sources array
+tables(d1,d2,d2)
+
+// This is computed on the tmp table
+.join({tables: [d1,d2], where: {cmp: '=', left:'d1.id', right: 'd2.id'})
+.join({tables: [d1,d2], where: {cmp: '=', left:'d2.id', right: 'd3.id'})
+.where([{cmp:'=', right:1, left: 'id'}])
+
+// Operations performed on the results
+.rename({country:'pais'})
+.delete({rows:0, columns:'a'})
+
+// Iterate over each cell of the range and create a cell for te column year
+.add({type: 'column', name: 'year', from: { columnRange: [1,20] }})
+.add({type: 'row', from: { rowRange: [1,20] } })
+
+
+// Sort at the end
+.sort({field})
+.limit({start:0, numRows: 10})
+
+this.operations = [];
+this.sources = [];
+this.temporary = [];
+this.result = [];
+
+_.each(this.operations, function(op){
+  this.result = op(this.result);
+});
+
+year
+102
+230
+123
+
+
+// This accumulate on the colum year the result of the selection of that ranges
+select('year')
+.from(d)
+.columnFromRange([{type:'column', input: ['0-10', '13-20'], as: 'year'}])
+.execute()

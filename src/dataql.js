@@ -26,6 +26,9 @@
       else
         return [];
     },
+    /**
+     * Functional version of unshift
+     */
     construct: function(head, tail){
       return _.cat([head], _.toArray(tail));
     },
@@ -33,6 +36,9 @@
       var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
       return str.replace(rtrim, '');
     },
+    /**
+     * Functional version of defaults. No side effects.
+     */
     fdefaults: function(){
       return _.defaults.apply(_, _.construct({}, _.toArray(arguments)));
     }
@@ -214,7 +220,6 @@
     var op;
 
     if(self instanceof DataQL){
-
       self._select = _.map(args, function(item){
         if(_.isString(item)) {
             op = {};
