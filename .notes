@@ -48,10 +48,15 @@ COND(schools.id=20) //condition to satisfy
 RANGE(row,0,20)
 
 // Set the sources array
-tables(d1,d2,d2)
+var t1 = {url: 'https://docs.google.com/spreadsheets/d/1UW1uOa7uoLZTC5M7NspVSWZeCUJJJUspY75GAIKzhAw', backend: 'gdocs'};
+var t2 = {url: 'http://demo.getdkan.com/sites/default/files/us_foreclosures_jan_2012_by_state_0.csv', backend: 'csv'};
+
+tables(t1,t2)
+
+op()
 
 // This is computed on the tmp table
-.join({tables: [d1,d2], where: {cmp: '=', left:'d1.id', right: 'd2.id'})
+.join({table:'t1', where: {cmp: '=', left:'id', right: 'id'})
 .join({tables: [d1,d2], where: {cmp: '=', left:'d2.id', right: 'd3.id'})
 .where([{cmp:'=', right:1, left: 'id'}])
 
@@ -69,7 +74,7 @@ tables(d1,d2,d2)
 .limit({start:0, numRows: 10})
 
 this.operations = [];
-this.sources = [];
+this.resources = [];
 this.temporary = [];
 this.result = [];
 

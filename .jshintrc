@@ -73,7 +73,8 @@
     "it":false,
     "describe":false,
     "expect":false,
-    "recline":false
+    "recline":false,
+    "DataQL":false
   },
   // Suppress warnings about == null comparisons.
   "eqnull": true

@@ -35,99 +35,28 @@ for(var i = 0; i < 10000; i++ ){
   });
 }
 
+var ql = new DataQL();
+var t1 = {
+  url: 'https://docs.google.com/spreadsheet/ccc?key=1UW1uOa7uoLZTC5M7NspVSWZeCUJJJUspY75GAIKzhAw#gid=0', // jshint ignore:line
+  backend: 'gdocs',
+  as: 'gdocs_example'
+};
+var t2 = {
+  url: 'https://docs.google.com/spreadsheet/ccc?key=0Aon3JiuouxLUdGZPaUZsMjBxeGhfOWRlWm85MmV0UUE#gid=0', // jshint ignore:line
+  backend: 'gdocs',
+  as: 'gdocs_extra_example'
+};
 
-
-
-// // Get UK order by id.
-// var r = select('country', 'title', 'date', 'id')
-//   .from(dataset)
-//   .order(function(row){
-//     return -row.id;
-//   })
-//   .where(function(row){
-//     return row.country === 'UK';
-//   })
-//   .limit(0,6)
-//   .execute(function(err, data){
-//     console.log(data, err);
-//   });
-
-// Get count by country.
-// var p = select()
-//   .from(dataset)
-//   .where(function(row){
-//     return row.country === 'DE';
-//   })
-//   .aggregate({method: 'count'})
-//   .execute(function(err, data){
-//     console.log(data, err);
-//   });
-
-
-// // Get percentage of y by country.
-// var k = select('country')
-//   .from(dataset)
-//   .order(function(row){
-//     return -row.id;
-//   })
-//   .aggregate({field:'y', method: 'percentage', as:'percentage'})
-//   .group('country')
-//   .execute(function(err, data){
-//     console.log(data, err);
-//   });
-
-// // Get total of y.
-// var k = select('country')
-//   .from(dataset)
-//   .aggregate({field:'y', method: 'sum', as:'total'})
-//   .execute(function(err, data){
-//     console.log(data, err);
-//   });
-
-// // Get max y
-// var k = select('country')
-//   .from(dataset)
-//   .aggregate({field:'y', method: 'max'})
-//   .execute(function(err, data){
-//     console.log(data, err);
-//   });
-
-
-// // Get min y
-// var k = select('country')
-//   .from(dataset)
-//   .aggregate({field:'y', method: 'min'})
-//   .execute(function(err, data){
-//     console.log(data, err);
-//   });
-
-
-// // Get average y by country.
-// var k = select('country')
-//   .from(dataset)
-//   .aggregate({field:'y', method: 'avg'})
-//   .group('country')
-//   .execute(function(err, data){
-//     console.log(data, err);
-//   });
-
-
-// // Get average y by country.
-// var k = select('country', 'date')
-//   .from(dataset)
-//   .group('country')
-//   .rename({country: 'pais'})
-//   .execute(function(err, data){
-//     console.log(data, err);
-//   });
-
-
-select('state', 'total.foreclosures')
-  .from({
-    url: 'http://demo.getdkan.com/sites/default/files/us_foreclosures_jan_2012_by_state_0.csv', // jshint ignore:line
-    backend:'papacsv'
-  })
-  .execute(function(err, data){
-    console.log(data, err);
-  });
-
+ql
+.tables(t1,t2)
+.op({method:'set', table: 'gdocs_example'})
+.op({
+  method:'join',
+  table: 'gdocs_extra_example',
+  where: {cmp: '=', left:'id', right: 'id'}
+})
+.op({
+  method:'filter',
+  where: {cmp: '=', left:'id', right: 1}
+})
+.execute();
