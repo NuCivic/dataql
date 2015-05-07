@@ -18,9 +18,10 @@
    * Comparators
    */
   DataQL.operators = {};
+
   // Equal
   DataQL.operators['='] = function(operand1, operand2) {
-    return operand1 == operand2;
+    return operand1 == operand2; // jshint ignore:line
   };
 
   // Greater than
@@ -44,28 +45,12 @@
   };
 
   /**
-   * Define the tables do you want to use.
-   * Use the recline format to define backends.
+   * Get operator from string
    */
-  DataQL.prototype.tables = function(){
-    var self = this;
-
-    // Tables to retrieve
-    self._tables = _.toArray(arguments);
-
-    // Fetched resources indexed by name
-    self._resources = {};
-
-    return self;
-  };
-
-  DataQL.prototype._buildCondition = function(condition){
-    return function(record, record2) {
-      var cmp = DataQL.operators[condition.cmp];
-      var left = _.iteratee(condition.left);
-      var right = _.iteratee(condition.right);
-      return cmp(left(record), right(record2));
-    };
+  DataQL.prototype._getCmp = function(cmp) {
+    if(!_.isFunction(DataQL.operators[cmp]))
+      throw new Error('Operator not supported');
+    return DataQL.operators[cmp];
   };
 
   /**
@@ -74,15 +59,25 @@
   DataQL.prototype._join = function(resources, result, params){
     var self = this;
     var toJoin = [];
+    var cmp = self._getCmp(params.where.cmp);
 
     if(_.has(resources, params.table)){
       toJoin = resources[params.table].records;
     }
+
     return _.map(result, function(resultRecord){
+
+      // Get all the matched elements on the join table
       var matched = _.filter(toJoin, function(joinRecord){
-        var cmp = global.DataQL.operators[params.where.cmp];
-        return cmp(resultRecord[params.where.left], joinRecord[params.where.right]);
+        return cmp(
+          resultRecord[params.where.left],
+          joinRecord[params.where.right]
+        );
       });
+
+      // Extend results with the join table.
+      // Like other sql databases we only use the first
+      // matched element.
       return _.extend(resultRecord, _.first(matched));
     });
   };
@@ -98,19 +93,27 @@
    * Filter rows (aka. sql where)
    */
   DataQL.prototype._filter = function(resources, result, params){
+    var self = this;
+    var cmp = self._getCmp(params.where.cmp);
+
     return _.filter(result, function(record){
-      var cmp = global.DataQL.operators[params.where.cmp];
       return cmp(record[params.where.left], params.where.right);
     });
   };
 
   /**
-   * Add an operation to the queue.
+   * Limit
    */
-  DataQL.prototype.op = function(op){
-    var self = this;
-    self._operations.push(op);
-    return self;
+  DataQL.prototype._limit = function(resources, result, params){
+    return result.slice(params.start, params.start + params.numRows);
+  };
+
+  /**
+   * Sort
+   */
+  DataQL.prototype._sort = function(resources, result, params){
+    // IMPLEMENT
+    return result;
   };
 
   /**
@@ -120,7 +123,6 @@
     var self = this;
 
     _.each(self._operations, function(op){
-      console.log(op);
       self._result = self['_' + op.method](
         self._resources,
         self._result,
@@ -129,20 +131,6 @@
     });
 
     return self;
-  };
-
-  /**
-   * Perform the query.
-   */
-  DataQL.prototype.execute = function(){
-    var self = this;
-    var tableNames = _.pluck(self._tables, 'as');
-
-    self._fetchResources().done(function(){
-     self._resources = _.zipObject(tableNames, _.toArray(arguments));
-     self._runOps();
-     console.table(self._result);
-    });
   };
 
   /**
@@ -169,6 +157,51 @@
     });
 
     return $.when.apply($, promises);
+  };
+
+
+  /**********************
+  *                     *
+  *     PUBLIC API      *
+  *                     *
+  **********************/
+
+  /**
+   * Define the tables do you want to use.
+   * Use the recline format to define backends.
+   */
+  DataQL.prototype.tables = function(){
+    var self = this;
+
+    // Tables to retrieve
+    self._tables = _.toArray(arguments);
+
+    // Fetched resources indexed by name
+    self._resources = {};
+
+    return self;
+  };
+  /**
+   * Add an operation to the queue.
+   */
+  DataQL.prototype.ops = function(ops){
+    var self = this;
+    self._operations = ops;
+    return self;
+  };
+
+  /**
+   * Perform the query.
+   */
+  DataQL.prototype.execute = function(){
+    var self = this;
+    var tableNames = _.pluck(self._tables, 'as');
+
+    self._fetchResources().done(function(){
+     self._resources = _.zipObject(tableNames, _.toArray(arguments));
+     self._runOps();
+     console.table(self._result);
+    });
   };
 
   // Expose dataql constructor

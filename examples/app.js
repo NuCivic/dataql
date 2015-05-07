@@ -49,14 +49,24 @@ var t2 = {
 
 ql
 .tables(t1,t2)
-.op({method:'set', table: 'gdocs_example'})
-.op({
-  method:'join',
-  table: 'gdocs_extra_example',
-  where: {cmp: '=', left:'id', right: 'id'}
-})
-.op({
-  method:'filter',
-  where: {cmp: '=', left:'id', right: 1}
-})
+.ops([
+  {
+    method: 'set',
+    table: 'gdocs_example'
+  },
+  {
+    method: 'join',
+    table: 'gdocs_extra_example',
+    where: {cmp: '=', left:'id', right: 'id'}
+  },
+  {
+    method: 'filter',
+    where: {cmp: '>', left:'id', right: 1}
+  },
+  {
+    method:'limit',
+    start: 2,
+    numRows: 3
+  }
+])
 .execute();
