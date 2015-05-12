@@ -155,6 +155,22 @@
   };
 
   /**
+   * Add column
+   */
+  DataQL.prototype._addColumn = function(resources, result, params){
+    // IMPLEMENT
+    return result;
+  };
+
+  /**
+   * Add row
+   */
+  DataQL.prototype._addRow = function(resources, result, params){
+    // IMPLEMENT
+    return result;
+  };
+
+  /**
    * Group by field
    */
   DataQL.prototype._groupBy = function(resources, result, params){
@@ -162,6 +178,18 @@
     return _.map(grouped, function(record){
       return record[0];
     });
+  };
+
+  /**
+   * Range
+   */
+  DataQL.prototype._range = function(resources, params){
+    var self = this;
+    var method = (params.type === 'column')
+      ? 'vectorFromColumns'
+      : 'vectorFromRows';
+
+    return self['_' + method](resources, params);
   };
 
   /**
@@ -265,6 +293,7 @@
 
     return self;
   };
+
   /**
    * Add an operation to the queue.
    */
@@ -287,8 +316,9 @@
         self._normalizeTable
       );
       self._resources = _.zipObject(tableNames, normalized);
-      console.log(self._vectorFromRows(self._resources,
+      console.log(self._range(self._resources,
         {
+          type: 'row',
           table: 'csv_example',
           field: 'state',
           from: 1,
