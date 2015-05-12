@@ -136,12 +136,22 @@
   };
 
   /**
-   * Rename a field
+   * Rename a column
    */
   DataQL.prototype._rename = function(resources, result, params){
     return _.map(result, function(record){
       record[params.newName] = record[params.oldName];
       return _.omit(record, params.oldName);
+    });
+  };
+
+
+  /**
+   * Delete a column
+   */
+  DataQL.prototype._delete = function(resources, result, params){
+    return _.map(result, function(record){
+      return _.omit(record, params.field);
     });
   };
 

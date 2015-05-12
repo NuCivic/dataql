@@ -80,6 +80,10 @@ tables(t1,t2)
   {
     method:'groupBy',
     field: 'country'
+  },
+  {
+    method:'delete',
+    field: 'date'
   }
 ])
 .execute(function(data){
