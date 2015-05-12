@@ -3,6 +3,19 @@ module.exports = function(config) {
   'use strict';
 
   config.set({
+    logLevel: config.LOG_DEBUG,
+    browsers: ['PhantomJS', 'PhantomJS_custom'],
+    customLaunchers: {
+      'PhantomJS_custom': {
+        base: 'PhantomJS',
+        options: {
+          windowName: 'my-window',
+          settings: {
+            webSecurityEnabled: false
+          }
+        }
+      }
+    },
     frameworks: ['mocha', 'expect'],
     files: [
       'vendor/jquery/dist/jquery.js',
@@ -17,6 +30,7 @@ module.exports = function(config) {
       'test/test.js'
     ],
     client: {
+      captureConsole: true,
       mocha: {
         timeout: 5000
       }

@@ -35,20 +35,19 @@ for(var i = 0; i < 10000; i++ ){
   });
 }
 
-var ql = new DataQL();
 var t1 = {
   url: 'https://docs.google.com/spreadsheet/ccc?key=1UW1uOa7uoLZTC5M7NspVSWZeCUJJJUspY75GAIKzhAw#gid=0', // jshint ignore:line
   backend: 'gdocs',
   as: 'gdocs_example'
 };
+
 var t2 = {
-  url: 'https://docs.google.com/spreadsheet/ccc?key=0Aon3JiuouxLUdGZPaUZsMjBxeGhfOWRlWm85MmV0UUE#gid=0', // jshint ignore:line
-  backend: 'gdocs',
-  as: 'gdocs_extra_example'
+  url: 'http://demo.getdkan.com/sites/default/files/us_foreclosures_jan_2012_by_state_0.csv', // jshint ignore:line
+  backend: 'csv',
+  as: 'csv_example'
 };
 
-ql
-.tables(t1,t2)
+tables(t1,t2)
 .ops([
   {
     method: 'set',
@@ -56,17 +55,33 @@ ql
   },
   {
     method: 'join',
-    table: 'gdocs_extra_example',
-    where: {cmp: '=', left:'id', right: 'id'}
+    table: 'csv_example',
+    where: {cmp: '=', left:'id', right: 'foreclosure.ratio'}
   },
   {
     method: 'filter',
-    where: {cmp: '>', left:'id', right: 1}
+    where: {cmp: '<', left:'id', right: 300}
   },
   {
     method:'limit',
-    start: 2,
-    numRows: 3
+    start: 0,
+    numRows: 2
+  },
+  {
+    method:'sort',
+    field: 'id',
+    order: 'asc'
+  },
+  {
+    method:'rename',
+    oldName: 'id',
+    newName: 'uid'
+  },
+  {
+    method:'groupBy',
+    field: 'country'
   }
 ])
-.execute();
+.execute(function(data){
+  console.log(data);
+});

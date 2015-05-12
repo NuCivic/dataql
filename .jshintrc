@@ -68,13 +68,13 @@
     "$": false,
     "jQuery": false,
     "_": false,
-    "select":false,
-    "mocha":false,
-    "it":false,
-    "describe":false,
-    "expect":false,
-    "recline":false,
-    "DataQL":false
+    "mocha": false,
+    "it": false,
+    "describe": false,
+    "expect": false,
+    "recline": false,
+    "DataQL": false,
+    "tables": false
   },
   // Suppress warnings about == null comparisons.
   "eqnull": true

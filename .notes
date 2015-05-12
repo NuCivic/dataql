@@ -18,7 +18,7 @@ select('year')
 .columnFromVector({row: 1, columns: ['A 2014', 'A 2013', 'A 2012'], as: 'Year'})
 .execute()
 
-
+data > filtro1 > .. > report
 
 
 BACKEND JSON prices FROM "http://dadas.com/xml.json";
@@ -93,3 +93,9 @@ select('year')
 .from(d)
 .columnFromRange([{type:'column', input: ['0-10', '13-20'], as: 'year'}])
 .execute()
+
+
+// Create predefine querys for most used resources (analytics, twitter, facebook, govdev)
+// Query templates
+
+Admin role can create querys with the query builder and users can choose from existing queries by linking their accounts.

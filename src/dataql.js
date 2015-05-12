@@ -47,6 +47,23 @@
   /**
    * Get operator from string
    */
+  DataQL.prototype._normalizeTable = function(table) {
+
+    // Test if records is properly formated as objects.
+    if(!(_.first(table.records) instanceof Array))
+      return table;
+
+    // If not, Convert records to object.
+    table.records = _.map(table.records, function(record){
+      return _.object(table.fields, record);
+    });
+
+    return table;
+  };
+
+  /**
+   * Get operator from string
+   */
   DataQL.prototype._getCmp = function(cmp) {
     if(!_.isFunction(DataQL.operators[cmp]))
       throw new Error('Operator not supported');
@@ -86,6 +103,8 @@
    * Set table
    */
   DataQL.prototype._set = function(resources, result, params){
+    if(!_.has(resources, params.table))
+      throw new Error('Table not fetched. Fetch and name the table before set.');
     return resources[params.table].records;
   };
 
@@ -109,9 +128,36 @@
   };
 
   /**
-   * Sort
+   * Sort by order
    */
   DataQL.prototype._sort = function(resources, result, params){
+    var order = (params.order === 'desc') ? false : true;
+    return _.sortByOrder(result, params.field, order);
+  };
+
+  /**
+   * Rename a field
+   */
+  DataQL.prototype._rename = function(resources, result, params){
+    return _.map(result, function(record){
+      record[params.newName] = record[params.oldName];
+      return _.omit(record, params.oldName);
+    });
+  };
+
+  /**
+   * Rename a field
+   */
+  DataQL.prototype._groupBy = function(resources, result, params){
+    return _.map(_.values(_.groupBy(result, params.field)), function(record){
+      return record[0];
+    });
+  };
+
+  /**
+   * Sum
+   */
+  DataQL.prototype._sum = function(resources, result, params){
     // IMPLEMENT
     return result;
   };
@@ -173,11 +219,18 @@
   DataQL.prototype.tables = function(){
     var self = this;
 
-    // Tables to retrieve
-    self._tables = _.toArray(arguments);
+    if(self instanceof DataQL){
 
-    // Fetched resources indexed by name
-    self._resources = {};
+      // Fetched resources indexed by name
+      self._resources = {};
+
+      // Tables to retrieve
+      self._tables = _.toArray(arguments);
+      return self;
+    } else {
+      var ql = new DataQL();
+      return ql.tables.apply(ql, _.toArray(arguments));
+    }
 
     return self;
   };
@@ -193,17 +246,22 @@
   /**
    * Perform the query.
    */
-  DataQL.prototype.execute = function(){
+  DataQL.prototype.execute = function(cb){
     var self = this;
     var tableNames = _.pluck(self._tables, 'as');
 
     self._fetchResources().done(function(){
-     self._resources = _.zipObject(tableNames, _.toArray(arguments));
-     self._runOps();
-     console.table(self._result);
+      var normalized = _.map(
+        _.toArray(arguments),
+        self._normalizeTable
+      );
+      self._resources = _.zipObject(tableNames, normalized);
+      self._runOps();
+      cb(self._result);
     });
   };
 
   // Expose dataql constructor
   global.DataQL = DataQL;
+  global.tables = DataQL.prototype.tables;
 })(window);
