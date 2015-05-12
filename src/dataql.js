@@ -145,7 +145,6 @@
     });
   };
 
-
   /**
    * Delete a column
    */
@@ -156,12 +155,34 @@
   };
 
   /**
-   * Rename a field
+   * Group by field
    */
   DataQL.prototype._groupBy = function(resources, result, params){
-    return _.map(_.values(_.groupBy(result, params.field)), function(record){
+    var grouped = _.values(_.groupBy(result, params.field));
+    return _.map(grouped, function(record){
       return record[0];
     });
+  };
+
+  /**
+   * Create a vector from a columns
+   */
+  DataQL.prototype._vectorFromColumns = function(resources, params){
+    // TODO: Add match pattern to match column names.
+    var record = resources[params.table].records[params.row];
+    return _.values(_.pick(record, params.fields));
+  };
+
+  /**
+   * Create a vector from row
+   */
+  DataQL.prototype._vectorFromRows = function(resources, params){
+    var records = resources[params.table].records;
+    return _.reduce(records, function(acum, record, index) {
+      if(index >= params.from && index <= params.to)
+        acum.push(record[params.field]);
+      return acum;
+    }, []);
   };
 
   /**
@@ -266,6 +287,14 @@
         self._normalizeTable
       );
       self._resources = _.zipObject(tableNames, normalized);
+      console.log(self._vectorFromRows(self._resources,
+        {
+          table: 'csv_example',
+          field: 'state',
+          from: 1,
+          to: 10
+        }
+      ));
       self._runOps();
       cb(self._result);
     });
