@@ -48,17 +48,31 @@
    * Get operator from string
    */
   DataQL.prototype._normalizeTable = function(table) {
+    var self = this;
 
     // Test if records is properly formated as objects.
-    if(!(_.first(table.records) instanceof Array))
+    if(_.first(table.records) instanceof Map)
       return table;
 
     // If not, Convert records to object.
     table.records = _.map(table.records, function(record){
-      return _.object(table.fields, record);
+      return self.toMap(table.fields, record);
     });
 
     return table;
+  };
+
+  /**
+   * Creates a map set
+   */
+  DataQL.prototype.toMap = function(fields, values) {
+    var map = new Map();
+
+    for (var i = 0, length = values.length ; i < length; i++) {
+      map.set(fields[i], values[i]);
+    };
+
+    return map;
   };
 
   /**
@@ -87,8 +101,8 @@
       // Get all the matched elements on the join table
       var matched = _.filter(toJoin, function(joinRecord){
         return cmp(
-          resultRecord[params.where.left],
-          joinRecord[params.where.right]
+          resultRecord.get(params.where.left),
+          joinRecord.get(params.where.right)
         );
       });
 
@@ -116,7 +130,7 @@
     var cmp = self._getCmp(params.where.cmp);
 
     return _.filter(result, function(record){
-      return cmp(record[params.where.left], params.where.right);
+      return cmp(record.get(params.where.left), params.where.right);
     });
   };
 
@@ -132,7 +146,18 @@
    */
   DataQL.prototype._sort = function(resources, result, params){
     var order = (params.order === 'desc') ? false : true;
-    return _.sortByOrder(result, params.field, order);
+    var field = params.field;
+
+    return result.sort(function (a, b) {
+      if(order) {
+        if(a.get(field) < b.get(field)) return -1;
+        if(a.get(field) > b.get(field)) return 1;
+      } else {
+        if(a.get(field) > b.get(field)) return -1;
+        if(a.get(field) < b.get(field)) return 1;
+      }
+      return 0;
+    });
   };
 
   /**
@@ -140,8 +165,9 @@
    */
   DataQL.prototype._rename = function(resources, result, params){
     return _.map(result, function(record){
-      record[params.newName] = record[params.oldName];
-      return _.omit(record, params.oldName);
+      record.set(params.newName, record.get(params.oldName));
+      record.delete(params.oldName);
+      return record;
     });
   };
 
@@ -150,23 +176,46 @@
    */
   DataQL.prototype._delete = function(resources, result, params){
     return _.map(result, function(record){
-      return _.omit(record, params.field);
+      record.delete(params.field);
+      return record;
     });
+  };
+
+  /**
+   * Add columns or rows
+   */
+  DataQL.prototype._add = function(resources, result, params){
+    var self = this;
+    var method = (params.type === 'column')
+      ? 'addColumn'
+      : 'addRow';
+
+    return self['_' + method](resources, result, params);
   };
 
   /**
    * Add column
    */
   DataQL.prototype._addColumn = function(resources, result, params){
-    // IMPLEMENT
-    return result;
+    var self = this;
+    var values = self._range(resources, result, params.from);
+
+    return _.map(result, function(record, index){
+      record.set(params.field, values[index]);
+      return record;
+    });
   };
 
   /**
    * Add row
    */
   DataQL.prototype._addRow = function(resources, result, params){
-    // IMPLEMENT
+    var self = this;
+    var values = self._range(resources, result, params.from);
+    var fields = _.first(result).keys();
+
+    result.push(self.toMap(Array.from(fields), values));
+
     return result;
   };
 
@@ -181,9 +230,12 @@
   };
 
   /**
-   * Range
+   * Create a vector either from a row or a column.
+   * Unlike other function this recieve only resources
+   * and params as parameters because it's a helper
+   * function and intended to be piped.
    */
-  DataQL.prototype._range = function(resources, params){
+  DataQL.prototype._range = function(resources, result, params){
     var self = this;
     var method = (params.type === 'column')
       ? 'vectorFromColumns'
@@ -198,7 +250,18 @@
   DataQL.prototype._vectorFromColumns = function(resources, params){
     // TODO: Add match pattern to match column names.
     var record = resources[params.table].records[params.row];
-    return _.values(_.pick(record, params.fields));
+    var result = [];
+    var index = 0;
+
+    // Loop over the records and store those
+    // satisfy the condition
+    record.forEach(function(value, key){
+      if(index >= params.from || index <= params.to){
+        result.push(value);
+      }
+      ++index;
+    });
+    return result;
   };
 
   /**
@@ -206,19 +269,12 @@
    */
   DataQL.prototype._vectorFromRows = function(resources, params){
     var records = resources[params.table].records;
+
     return _.reduce(records, function(acum, record, index) {
       if(index >= params.from && index <= params.to)
-        acum.push(record[params.field]);
+        acum.push(record.get(params.field));
       return acum;
     }, []);
-  };
-
-  /**
-   * Sum
-   */
-  DataQL.prototype._sum = function(resources, result, params){
-    // IMPLEMENT
-    return result;
   };
 
   /**
@@ -262,6 +318,74 @@
     });
 
     return $.when.apply($, promises);
+  };
+
+
+  /**********************
+  *                     *
+  *     AGGREGATIONS    *
+  *                     *
+  **********************/
+
+  /**
+   * Sum a field grouped by any field.
+   */
+  DataQL.prototype._sum = function(resources, result, params){
+    var self = this;
+
+    return _.values(_.reduce(result, function(acum, record, index) {
+      var gb = record.get(params.groupBy);
+      var f = params.field;
+
+      if (gb in acum) {
+        acum[gb].set(f, Number(acum[gb].get(f)) + Number(record.get(f)));
+      } else {
+        acum[gb] = record;
+        acum[gb].set(f, Number(acum[gb].get(f)));
+      }
+
+      return acum;
+    }, {}));
+  };
+
+  /**
+   * Avg of a field grouped by any field.
+   */
+  DataQL.prototype._avg = function(resources, result, params){
+    var self = this;
+    // IMPLEMENT
+  };
+
+  /**
+   * Percentage of a field grouped by any field.
+   */
+  DataQL.prototype._percentage = function(resources, result, params){
+    var self = this;
+    // IMPLEMENT
+  };
+
+  /**
+   * Max of a field grouped by any field.
+   */
+  DataQL.prototype._max = function(resources, result, params){
+    var self = this;
+    // IMPLEMENT
+  };
+
+  /**
+   * Min of a field grouped by any field.
+   */
+  DataQL.prototype._min = function(resources, result, params){
+    var self = this;
+    // IMPLEMENT
+  };
+
+  /**
+   * Min of a field grouped by any field.
+   */
+  DataQL.prototype._count = function(resources, result, params){
+    var self = this;
+    // IMPLEMENT
   };
 
 
@@ -311,20 +435,16 @@
     var tableNames = _.pluck(self._tables, 'as');
 
     self._fetchResources().done(function(){
+
+      // FIX ME: this could be removed transforming
+      // how csv parser works by returning maps
+      // instead of objects.
       var normalized = _.map(
         _.toArray(arguments),
-        self._normalizeTable
+        self._normalizeTable,
+        self
       );
       self._resources = _.zipObject(tableNames, normalized);
-      console.log(self._range(self._resources,
-        {
-          type: 'row',
-          table: 'csv_example',
-          field: 'state',
-          from: 1,
-          to: 10
-        }
-      ));
       self._runOps();
       cb(self._result);
     });

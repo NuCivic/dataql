@@ -58,33 +58,45 @@ tables(t1,t2)
     table: 'csv_example',
     where: {cmp: '=', left:'id', right: 'foreclosure.ratio'}
   },
+  // {
+  //   method: 'filter',
+  //   where: {cmp: '<', left:'id', right: 300}
+  // },
+  // {
+  //   method:'limit',
+  //   start: 0,
+  //   numRows: 2
+  // },
   {
-    method: 'filter',
-    where: {cmp: '<', left:'id', right: 300}
+    method:'sum',
+    field: 'x',
+    groupBy: 'country'
   },
-  {
-    method:'limit',
-    start: 0,
-    numRows: 2
-  },
-  {
-    method:'sort',
-    field: 'id',
-    order: 'asc'
-  },
-  {
-    method:'rename',
-    oldName: 'id',
-    newName: 'uid'
-  },
-  {
-    method:'groupBy',
-    field: 'country'
-  },
-  {
-    method:'delete',
-    field: 'date'
-  }
+  // {
+  //   method:'rename',
+  //   oldName: 'id',
+  //   newName: 'uid'
+  // },
+  // {
+  //   method:'groupBy',
+  //   field: 'country'
+  // },
+  // {
+  //   method:'delete',
+  //   field: 'date'
+  // },
+  // {
+  //   method:'add',
+  //   field: 'extraido',
+  //   type: 'row',
+  //   from: {
+  //     type: 'row',
+  //     table: 'gdocs_example',
+  //     field: 'country',
+  //     from: 1,
+  //     to: 5
+  //   }
+  // }
 ])
 .execute(function(data){
   console.log(data);
