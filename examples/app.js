@@ -68,8 +68,7 @@ tables(t1,t2)
   //   numRows: 2
   // },
   {
-    method:'sum',
-    field: 'x',
+    method:'count',
     groupBy: 'country'
   },
   // {

@@ -336,14 +336,15 @@
     return _.values(_.reduce(result, function(acum, record, index) {
       var gb = record.get(params.groupBy);
       var f = params.field;
+      var as = params.as || f;
+      var current = Number(record.get(f));
 
       if (gb in acum) {
-        acum[gb].set(f, Number(acum[gb].get(f)) + Number(record.get(f)));
+        acum[gb].set(as, Number(acum[gb].get(as)) + current);
       } else {
         acum[gb] = record;
-        acum[gb].set(f, Number(acum[gb].get(f)));
+        acum[gb].set(as, current);
       }
-
       return acum;
     }, {}));
   };
@@ -369,7 +370,25 @@
    */
   DataQL.prototype._max = function(resources, result, params){
     var self = this;
-    // IMPLEMENT
+
+    return _.values(_.reduce(result, function(acum, record, index) {
+      var gb = record.get(params.groupBy);
+      var f = params.field;
+      var as = params.as || f;
+      var current = Number(record.get(f));
+      var previous;
+
+      if (gb in acum) {
+        previous = Number(acum[gb].get(as));
+        if (current > previous) {
+          acum[gb].set(as, current);
+        }
+      } else {
+        acum[gb] = record;
+        acum[gb].set(as, current);
+      }
+      return acum;
+    }, {}));
   };
 
   /**
@@ -377,7 +396,25 @@
    */
   DataQL.prototype._min = function(resources, result, params){
     var self = this;
-    // IMPLEMENT
+
+    return _.values(_.reduce(result, function(acum, record, index) {
+      var gb = record.get(params.groupBy);
+      var f = params.field;
+      var as = params.as || f;
+      var current = Number(record.get(f));
+      var previous;
+
+      if (gb in acum) {
+        previous = Number(acum[gb].get(as));
+        if (current < previous) {
+          acum[gb].set(as, current);
+        }
+      } else {
+        acum[gb] = record;
+        acum[gb].set(as, current);
+      }
+      return acum;
+    }, {}));
   };
 
   /**
@@ -385,7 +422,21 @@
    */
   DataQL.prototype._count = function(resources, result, params){
     var self = this;
-    // IMPLEMENT
+
+    return _.values(_.reduce(result, function(acum, record, index) {
+      var gb = record.get(params.groupBy);
+      var as = params.as || 'count';
+      var previous;
+
+      if (gb in acum) {
+        previous = Number(acum[gb].get(as));
+        acum[gb].set(as, previous + 1);
+      } else {
+        acum[gb] = record;
+        acum[gb].set(as, 1);
+      }
+      return acum;
+    }, {}));
   };
 
 
