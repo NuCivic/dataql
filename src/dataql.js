@@ -387,7 +387,30 @@
    */
   DataQL.prototype._percentage = function(resources, result, params){
     var self = this;
-    // IMPLEMENT
+    var f = params.field;
+    var as = params.as || 'percentage';
+    var previous;
+    var total = 0;
+
+    var precomputed = _.values(_.reduce(result, function(acum, record, index) {
+      var gb = record.get(params.groupBy);
+      var current = Number(record.get(f));
+
+      if (gb in acum) {
+        acum[gb].set('__total', Number(acum[gb].get('__total')) + current);
+      } else {
+        acum[gb] = record;
+        acum[gb].set('__total', current);
+      }
+      total += current;
+      return acum;
+    }, {}));
+
+    return _.map(precomputed, function(record, index) {
+      record.set(as, record.get('__total') / total);
+      record.delete('__total');
+      return record;
+    });
   };
 
   /**
