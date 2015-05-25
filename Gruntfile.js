@@ -8,7 +8,7 @@ module.exports = function(grunt) {
         separator: ';'
       },
       dist: {
-        src: ['src/**/*.js', 'lib/**/*.js'],
+        src: ['src/dataql.js', 'src/dataql.aggregations.js'],
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
@@ -17,7 +17,7 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> v0.1 */\n'
       },
       build: {
-        src: ['src/**/*.js', 'lib/**/*.js'],
+        src: ['src/dataql.js', 'src/dataql.aggregations.js'],
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
@@ -77,8 +77,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('build', [
     'jshint',
-    'concat',
-    'uglify'
+    'concat'
   ]);
 
   grunt.registerTask('lint', ['jshint']);

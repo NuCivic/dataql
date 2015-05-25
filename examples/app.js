@@ -72,31 +72,31 @@ tables(t1,t2)
     field: 'x',
     groupBy: 'country'
   },
-  // {
-  //   method:'rename',
-  //   oldName: 'id',
-  //   newName: 'uid'
-  // },
+  {
+    method:'rename',
+    oldName: 'id',
+    newName: 'uid'
+  },
   // {
   //   method:'groupBy',
   //   field: 'country'
   // },
-  // {
-  //   method:'delete',
-  //   field: 'date'
-  // },
-  // {
-  //   method:'add',
-  //   field: 'extraido',
-  //   type: 'row',
-  //   from: {
-  //     type: 'row',
-  //     table: 'gdocs_example',
-  //     field: 'country',
-  //     from: 1,
-  //     to: 5
-  //   }
-  // }
+  {
+    method:'delete',
+    field: 'date'
+  },
+  {
+    method:'add',
+    field: 'extraido',
+    type: 'column',
+    from: {
+      type: 'row',
+      table: 'gdocs_example',
+      field: 'country',
+      from: 1,
+      to: 5
+    }
+  }
 ])
 .execute(function(data){
   console.log(data);

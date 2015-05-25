@@ -62,6 +62,7 @@
    * RELAXING OPTIONS
    * =================
    */
+  "laxcomma": true,
 
   // Suppress warnings about globals.
   "globals": {
