@@ -354,7 +354,32 @@
    */
   DataQL.prototype._avg = function(resources, result, params){
     var self = this;
-    // IMPLEMENT
+    var f = params.field;
+    var as = params.as || 'avg';
+    var previous;
+
+    var precomputed = _.values(_.reduce(result, function(acum, record, index) {
+      var gb = record.get(params.groupBy);
+      var current = Number(record.get(f));
+
+      if (gb in acum) {
+        previous = Number(acum[gb].get(f));
+        acum[gb].set('__total', Number(acum[gb].get('__total')) + current);
+        acum[gb].set('__count', previous + 1);
+      } else {
+        acum[gb] = record;
+        acum[gb].set('__total', current);
+        acum[gb].set('__count', 1);
+      }
+      return acum;
+    }, {}));
+
+    return _.map(precomputed, function(record, index) {
+      record.set(as, record.get('__total') / record.get('__count'));
+      record.delete('__total');
+      record.delete('__count');
+      return record;
+    });
   };
 
   /**

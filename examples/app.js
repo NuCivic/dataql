@@ -68,7 +68,8 @@ tables(t1,t2)
   //   numRows: 2
   // },
   {
-    method:'count',
+    method:'avg',
+    field: 'x',
     groupBy: 'country'
   },
   // {
