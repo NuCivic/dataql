@@ -56,23 +56,10 @@
 
     // If not, Convert records to object.
     table.records = _.map(table.records, function(record){
-      return self.toMap(table.fields, record);
+      return _.object(table.fields, record);
     });
 
     return table;
-  };
-
-  /**
-   * Creates a map set
-   */
-  DataQL.prototype.toMap = function(fields, values) {
-    var map = new Map();
-
-    for (var i = 0, length = values.length ; i < length; i++) {
-      map.set(fields[i], values[i]);
-    }
-
-    return map;
   };
 
   /**
@@ -101,8 +88,8 @@
       // Get all the matched elements on the join table
       var matched = _.filter(toJoin, function(joinRecord){
         return cmp(
-          resultRecord.get(params.where.left),
-          joinRecord.get(params.where.right)
+          resultRecord[params.where.left],
+          joinRecord[params.where.right]
         );
       });
 
@@ -130,7 +117,7 @@
     var cmp = self._getCmp(params.where.cmp);
 
     return _.filter(result, function(record){
-      return cmp(record.get(params.where.left), params.where.right);
+      return cmp(record[params.where.left], params.where.right);
     });
   };
 
@@ -147,17 +134,7 @@
   DataQL.prototype._sort = function(resources, result, params){
     var order = (params.order === 'desc') ? false : true;
     var field = params.field;
-
-    return result.sort(function (a, b) {
-      if(order) {
-        if(a.get(field) < b.get(field)) return -1;
-        if(a.get(field) > b.get(field)) return 1;
-      } else {
-        if(a.get(field) > b.get(field)) return -1;
-        if(a.get(field) < b.get(field)) return 1;
-      }
-      return 0;
-    });
+    return _.sortByOrder(result, field, order);
   };
 
   /**
@@ -165,9 +142,8 @@
    */
   DataQL.prototype._rename = function(resources, result, params){
     return _.map(result, function(record){
-      record.set(params.newName, record.get(params.oldName));
-      record.delete(params.oldName);
-      return record;
+      record[params.newName] = record[params.oldName];
+      return _.omit(record, params.oldName);
     });
   };
 
@@ -176,8 +152,7 @@
    */
   DataQL.prototype._delete = function(resources, result, params){
     return _.map(result, function(record){
-      record.delete(params.field);
-      return record;
+      return _.omit(record, params.field);
     });
   };
 
@@ -201,7 +176,7 @@
     var values = self._range(resources, result, params.from);
 
     return _.map(result, function(record, index){
-      record.set(params.field, values[index]);
+      record[params.field] = values[index];
       return record;
     });
   };
@@ -272,7 +247,7 @@
 
     return _.reduce(records, function(acum, record, index) {
       if(index >= params.from && index <= params.to)
-        acum.push(record.get(params.field));
+        acum.push(record[params.field]);
       return acum;
     }, []);
   };
@@ -320,6 +295,62 @@
     return $.when.apply($, promises);
   };
 
+
+  /****************************
+  *                           *
+  *     Field transforms      *
+  *                           *
+  ****************************/
+
+  /**
+   * Trim
+   */
+  DataQL.prototype._trim = function(resources, result, params){
+    var self = this;
+    var fields = params.fields;
+    return _.map(result, function(record){
+      return _.mapValues(record, function(value, key){
+        return _.includes(fields, key) ?
+          self.utils.trim(value) :
+          value;
+      });
+    });
+  };
+
+  /**
+   * Cast
+   */
+  DataQL.prototype._cast = function(resources, result, params){
+    var self = this;
+    var fields = _.pluck(params.fields, 'field');
+
+    return _.map(result, function(record){
+      return _.mapValues(record, function(value, key){
+        if( _.contains(fields, key)) {
+          var field = _.findWhere(params.fields, {field: key});
+          var type = field.type;
+          var args = field.args;
+          return self.utils.cast.apply(null, [value, type].concat(args))
+        }
+        return value;
+      });
+    });
+  };
+
+  /**
+   * Substring
+   */
+  DataQL.prototype._substr = function(resources, result, params){
+    var self = this;
+    var field = params.field;
+    var start = params.start;
+    var end = params.end;
+
+    return _.map(result, function(record){
+      record[field] = String(record[field]).substring(start, end);
+      return record;
+    });
+  };
 
   /**********************
   *                     *

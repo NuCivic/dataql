@@ -41,32 +41,37 @@ var t1 = {
   as: 'gdocs_example'
 };
 
-var t2 = {
-  url: 'http://demo.getdkan.com/sites/default/files/us_foreclosures_jan_2012_by_state_0.csv', // jshint ignore:line
+var t = {
+  url: 'data/example.csv', // jshint ignore:line
   backend: 'csv',
   as: 'csv_example'
 };
 
-tables(t1,t2)
+tables(t1)
 .ops([
   {
     method: 'set',
     table: 'gdocs_example'
   },
-  {
-    method: 'join',
-    table: 'csv_example',
-    where: {cmp: '=', left:'id', right: 'foreclosure.ratio'}
-  },
   // {
-  //   method: 'filter',
-  //   where: {cmp: '<', left:'id', right: 300}
+  //   method: 'join',
+  //   table: 'csv_example',
+  //   where: {cmp: '=', left:'id', right: 'foreclosure.ratio'}
   // },
+  {
+    method: 'filter',
+    where: {cmp: '<', left:'id', right: 300}
+  },
   // {
   //   method:'limit',
   //   start: 0,
   //   numRows: 2
   // },
+  {
+    method:'sort',
+    field: 'x',
+    order: 'desc'
+  },
   {
     method:'percentage',
     field: 'x',
@@ -74,12 +79,12 @@ tables(t1,t2)
   },
   {
     method:'rename',
-    oldName: 'id',
-    newName: 'uid'
+    oldName: 'country',
+    newName: 'pais'
   },
   // {
   //   method:'groupBy',
-  //   field: 'country'
+  //   field: 'pais'
   // },
   {
     method:'delete',
@@ -96,6 +101,24 @@ tables(t1,t2)
       from: 1,
       to: 5
     }
+  },
+  {
+    method:'trim',
+    fields: ['pais', 'extraido', 'label']
+  },
+  {
+    method: 'cast',
+    fields: [{
+      field: 'lat',
+      type: 'float',
+      args: []
+    }]
+  },
+  {
+    method: 'substr',
+    field: 'extra',
+    start: 0,
+    end: 3
   }
 ])
 .execute(function(data){

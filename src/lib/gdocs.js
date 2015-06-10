@@ -107,7 +107,7 @@ if (typeof module !== 'undefined' && module != null && typeof require !== 'undef
           value = parseFloat(num) / 100;
         }
 
-        row.set(col, value);
+        row[col] = value;
       });
       return row;
     });

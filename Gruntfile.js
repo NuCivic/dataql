@@ -1,6 +1,21 @@
 module.exports = function(grunt) {
   'use strict';
   // Project configuration.
+  var files = [
+    'src/lib/polifills/core.js',
+    'src/lib/ckan.js',
+    'src/lib/csv.js',
+    'src/lib/elasticsearch.js',
+    'src/lib/gdocs.js',
+    'src/lib/inline.js',
+    'src/lib/papaparse.js',
+    'src/lib/papaparse.js',
+    'src/dataql.js',
+    'src/dataql.aggregations.js',
+    'src/dataql.queryparser.js',
+    'src/dataql.utils.js',
+  ]
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     concat: {
@@ -8,7 +23,7 @@ module.exports = function(grunt) {
         separator: ';'
       },
       dist: {
-        src: ['src/dataql.js', 'src/dataql.aggregations.js'],
+        src: files,
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
@@ -17,12 +32,9 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> v0.1 */\n'
       },
       build: {
-        src: ['src/dataql.js', 'src/dataql.aggregations.js'],
+        src: files,
         dest: 'dist/<%= pkg.name %>.min.js'
       }
-    },
-    livereload: {
-
     },
     express: {
       all: {
@@ -36,7 +48,17 @@ module.exports = function(grunt) {
     },
     watch: {
       all: {
-        files: 'examples/*.html',
+        files: files,
+        tasks: ['build'],
+        options: {
+          livereload: true
+        }
+      }
+    },
+    watch_debug: {
+      all: {
+        files: files.concat('examples/*.js'),
+        tasks: ['concat'],
         options: {
           livereload: true
         }
@@ -52,7 +74,8 @@ module.exports = function(grunt) {
         'Gruntfile.js',
         'src/**/*.js',
         'examples/*.js',
-        '!**/node_modules/**'],
+        '!**/node_modules/**'
+      ],
       options: {
         jshintrc: true
       }
@@ -77,7 +100,15 @@ module.exports = function(grunt) {
 
   grunt.registerTask('build', [
     'jshint',
-    'concat'
+    'concat',
+    'uglify',
+  ]);
+
+  grunt.registerTask('debug', [
+    'express',
+    'concat',
+    'open',
+    'watch'
   ]);
 
   grunt.registerTask('lint', ['jshint']);

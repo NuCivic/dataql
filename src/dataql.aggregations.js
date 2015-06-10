@@ -16,16 +16,16 @@
     var self = this;
 
     return _.values(_.reduce(result, function(acum, record, index) {
-      var gb = record.get(params.groupBy);
+      var gb = record[params.groupBy];
       var f = params.field;
       var as = params.as || f;
-      var current = Number(record.get(f));
+      var current = Number(record[f]);
 
       if (gb in acum) {
-        acum[gb].set(as, Number(acum[gb].get(as)) + current);
+        acum[gb][as] = Number(acum[gb][as]) + current;
       } else {
         acum[gb] = record;
-        acum[gb].set(as, current);
+        acum[gb][as] = current;
       }
       return acum;
     }, {}));
@@ -41,26 +41,24 @@
     var previous;
 
     var precomputed = _.values(_.reduce(result, function(acum, record, index) {
-      var gb = record.get(params.groupBy);
-      var current = Number(record.get(f));
+      var gb = record[params.groupBy];
+      var current = Number(record[f]);
 
       if (gb in acum) {
-        previous = Number(acum[gb].get(f));
-        acum[gb].set('__total', Number(acum[gb].get('__total')) + current);
-        acum[gb].set('__count', previous + 1);
+        previous = Number(acum[gb][f]);
+        acum[gb]['__total'] = Number(acum[gb]['__total']) + current;
+        acum[gb]['__count'] = previous + 1;
       } else {
         acum[gb] = record;
-        acum[gb].set('__total', current);
-        acum[gb].set('__count', 1);
+        acum[gb]['__total'] = current;
+        acum[gb]['__count'] = 1;
       }
       return acum;
     }, {}));
 
     return _.map(precomputed, function(record, index) {
-      record.set(as, record.get('__total') / record.get('__count'));
-      record.delete('__total');
-      record.delete('__count');
-      return record;
+      record[as] = record['__total'] / record['__count'];
+      return _.omit(record, '__total', '__count');
     });
   };
 
@@ -75,23 +73,22 @@
     var total = 0;
 
     var precomputed = _.values(_.reduce(result, function(acum, record, index) {
-      var gb = record.get(params.groupBy);
-      var current = Number(record.get(f));
+      var gb = record[params.groupBy];
+      var current = Number(record[f]);
 
       if (gb in acum) {
-        acum[gb].set('__total', Number(acum[gb].get('__total')) + current);
+        acum[gb]['__total'] = Number(acum[gb]['__total']) + current;
       } else {
         acum[gb] = record;
-        acum[gb].set('__total', current);
+        acum[gb]['__total'] = current;
       }
       total += current;
       return acum;
     }, {}));
 
     return _.map(precomputed, function(record, index) {
-      record.set(as, record.get('__total') / total);
-      record.delete('__total');
-      return record;
+      record[as] = record['__total'] / total;
+      return _.omit(record, '__total');
     });
   };
 
@@ -102,20 +99,20 @@
     var self = this;
 
     return _.values(_.reduce(result, function(acum, record, index) {
-      var gb = record.get(params.groupBy);
+      var gb = record[params.groupBy];
       var f = params.field;
       var as = params.as || f;
-      var current = Number(record.get(f));
+      var current = Number(record[f]);
       var previous;
 
       if (gb in acum) {
-        previous = Number(acum[gb].get(as));
+        previous = Number(acum[gb][as]);
         if (current > previous) {
-          acum[gb].set(as, current);
+          acum[gb][as] = current;
         }
       } else {
         acum[gb] = record;
-        acum[gb].set(as, current);
+        acum[gb][as] = current;
       }
       return acum;
     }, {}));
@@ -128,20 +125,20 @@
     var self = this;
 
     return _.values(_.reduce(result, function(acum, record, index) {
-      var gb = record.get(params.groupBy);
+      var gb = record[params.groupBy];
       var f = params.field;
       var as = params.as || f;
-      var current = Number(record.get(f));
+      var current = Number(record[f]);
       var previous;
 
       if (gb in acum) {
-        previous = Number(acum[gb].get(as));
+        previous = Number(acum[gb][as]);
         if (current < previous) {
-          acum[gb].set(as, current);
+          acum[gb][as] = current;
         }
       } else {
         acum[gb] = record;
-        acum[gb].set(as, current);
+        acum[gb][as] = current;
       }
       return acum;
     }, {}));
@@ -154,16 +151,16 @@
     var self = this;
 
     return _.values(_.reduce(result, function(acum, record, index) {
-      var gb = record.get(params.groupBy);
+      var gb = record[params.groupBy];
       var as = params.as || 'count';
       var previous;
 
       if (gb in acum) {
-        previous = Number(acum[gb].get(as));
-        acum[gb].set(as, previous + 1);
+        previous = Number(acum[gb][as]);
+        acum[gb][as] = previous + 1;
       } else {
         acum[gb] = record;
-        acum[gb].set(as, 1);
+        acum[gb][as] = 1;
       }
       return acum;
     }, {}));
