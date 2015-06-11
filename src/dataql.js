@@ -256,7 +256,7 @@
    * @param  {String} backend  Backend string representation.
    */
   DQ.prototype._backendFromString = function(backend) {
-    return _.findWhere(recline.Backend, {__type__: backend});
+    return _.findWhere(DQ.backends, {__type__: backend});
   };
 
   /**
@@ -342,7 +342,6 @@
 
   /**
    * Define the tables do you want to use.
-   * Use the recline format to define backends.
    */
   DQ.prototype.tables = function(){
     var self = this;

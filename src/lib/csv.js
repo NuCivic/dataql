@@ -276,9 +276,6 @@ var CSV = {};
   }
 }(CSV));
 
-
-// backwards compatability for use in Recline
-var recline = recline || {};
-recline.Backend = recline.Backend || {};
-recline.Backend.CSV = CSV;
-
+var DQ = DQ || {};
+DQ.backends = DQ.backends || {};
+DQ.backends.CSV = CSV;

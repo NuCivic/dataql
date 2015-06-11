@@ -129,5 +129,5 @@ tables(t2)
   // }
 ])
 .execute(function(data){
-  console.log(_.pluck(data, 'total', 'SchoolId'));
+  console.log(data);
 });

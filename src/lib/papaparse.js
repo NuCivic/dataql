@@ -42,7 +42,6 @@ var PapaCSV = {};
 
 }(PapaCSV));
 
-// backwards compatability for use in Recline
-var recline = recline || {};
-recline.Backend = recline.Backend || {};
-recline.Backend.PapaCSV = PapaCSV;
+var DQ = DQ || {};
+DQ.backends = DQ.backends || {};
+DQ.backends.PapaCSV = PapaCSV;

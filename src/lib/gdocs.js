@@ -1,12 +1,4 @@
-var recline = recline || {};
-recline.Backend = recline.Backend || {};
-recline.Backend.GDocs = recline.Backend.GDocs || {};
-
-// note module is *defined* in qunit tests :-(
-if (typeof module !== 'undefined' && module != null && typeof require !== 'undefined') {
-  var _ = require('underscore');
-  module.exports = recline;
-}
+var GDocs = {};
 
 (function(my) {
   my.__type__ = 'gdocs';
@@ -167,5 +159,8 @@ if (typeof module !== 'undefined' && module != null && typeof require !== 'undef
       worksheetIndex: worksheet
     };
   };
-}(recline.Backend.GDocs));
+}(GDocs));
 
+var DQ = DQ || {};
+DQ.backends = DQ.backends || {};
+DQ.backends.GDocs = GDocs;

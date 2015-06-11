@@ -1,6 +1,5 @@
 var Inline = {};
 
-// Note that provision of jQuery is optional (it is **only** needed if you use fetch on a remote file)
 (function(my) {
   "use strict";
   my.__type__ = 'inline';
@@ -13,7 +12,6 @@ var Inline = {};
 
 }(Inline));
 
-// backwards compatability for use in Recline
-var recline = recline || {};
-recline.Backend = recline.Backend || {};
-recline.Backend.Inline = Inline;
+var DQ = DQ || {};
+DQ.backends = DQ.backends || {};
+DQ.backends.Inline = Inline;

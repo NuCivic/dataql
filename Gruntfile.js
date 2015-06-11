@@ -2,15 +2,11 @@ module.exports = function(grunt) {
   'use strict';
   // Project configuration.
   var files = [
-    'src/lib/polifills/core.js',
-    'src/lib/ckan.js',
+    'src/dataql.js',
     'src/lib/csv.js',
-    'src/lib/elasticsearch.js',
     'src/lib/gdocs.js',
     'src/lib/inline.js',
     'src/lib/papaparse.js',
-    'src/lib/papaparse.js',
-    'src/dataql.js',
     'src/dataql.aggregations.js',
     'src/dataql.queryparser.js',
     'src/dataql.utils.js',
