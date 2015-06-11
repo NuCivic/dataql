@@ -12,7 +12,7 @@
   /**
    * Sum a field grouped by any field.
    */
-  DataQL.prototype._sum = function(resources, result, params){
+  DQ.prototype._sum = function(resources, result, params){
     var self = this;
 
     return _.values(_.reduce(result, function(acum, record, index) {
@@ -34,7 +34,7 @@
   /**
    * Avg of a field grouped by any field.
    */
-  DataQL.prototype._avg = function(resources, result, params){
+  DQ.prototype._avg = function(resources, result, params){
     var self = this;
     var f = params.field;
     var as = params.as || 'avg';
@@ -65,7 +65,7 @@
   /**
    * Percentage of a field grouped by any field.
    */
-  DataQL.prototype._percentage = function(resources, result, params){
+  DQ.prototype._percentage = function(resources, result, params){
     var self = this;
     var f = params.field;
     var as = params.as || 'percentage';
@@ -95,7 +95,7 @@
   /**
    * Max of a field grouped by any field.
    */
-  DataQL.prototype._max = function(resources, result, params){
+  DQ.prototype._max = function(resources, result, params){
     var self = this;
 
     return _.values(_.reduce(result, function(acum, record, index) {
@@ -121,7 +121,7 @@
   /**
    * Min of a field grouped by any field.
    */
-  DataQL.prototype._min = function(resources, result, params){
+  DQ.prototype._min = function(resources, result, params){
     var self = this;
 
     return _.values(_.reduce(result, function(acum, record, index) {
@@ -147,7 +147,7 @@
   /**
    * Count of a field grouped by any field.
    */
-  DataQL.prototype._count = function(resources, result, params){
+  DQ.prototype._count = function(resources, result, params){
     var self = this;
 
     return _.values(_.reduce(result, function(acum, record, index) {

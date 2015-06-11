@@ -15,7 +15,7 @@ function randomDate(start, end) {
   return new Date(dt);
 }
 
-for(var i = 0; i < 10000; i++ ){
+for(var i = 0; i < 10; i++ ){
   country = _.sample(countries);
   date = randomDate(new Date(2050, 0, 1), new Date());
   lat = _.random(-90, 90);
@@ -31,7 +31,6 @@ for(var i = 0; i < 10000; i++ ){
     country,
     lat:lat,
     lon:lon,
-    extra:'mariano'
   });
 }
 
@@ -41,86 +40,94 @@ var t1 = {
   as: 'gdocs_example'
 };
 
-var t = {
+var t2 = {
   url: 'data/example.csv', // jshint ignore:line
   backend: 'csv',
   as: 'csv_example'
 };
 
-tables(t1)
+var t3 = {
+  backend: 'inline',
+  records: dataset,
+  as: 'inline_example'
+};
+
+/// TODO: Proxy loadsh functions.
+tables(t2)
 .ops([
   {
     method: 'set',
-    table: 'gdocs_example'
+    table: 'csv_example'
   },
   // {
   //   method: 'join',
-  //   table: 'csv_example',
-  //   where: {cmp: '=', left:'id', right: 'foreclosure.ratio'}
+  //   table: 'gdocs_example',
+  //   where: {cmp: '=', left:'country', right: 'country'}
+  // },
+  // {
+  //   method: 'filter',
+  //   where: {cmp: '<', left:'id', right: 300}
+  // },
+  // // {
+  // //   method:'limit',
+  // //   start: 0,
+  // //   numRows: 2
+  // // },
+  // {
+  //   method:'sort',
+  //   field: 'x',
+  //   order: 'desc'
   // },
   {
-    method: 'filter',
-    where: {cmp: '<', left:'id', right: 300}
+    method:'sum',
+    as: 'total',
+    field: 'Achievement14E',
+    groupBy: 'SchoolId'
   },
   // {
-  //   method:'limit',
+  //   method:'rename',
+  //   oldName: 'country',
+  //   newName: 'pais'
+  // },
+  // // {
+  // //   method:'groupBy',
+  // //   field: 'pais'
+  // // },
+  // {
+  //   method:'delete',
+  //   field: 'date'
+  // },
+  // {
+  //   method:'add',
+  //   field: 'extraido',
+  //   type: 'column',
+  //   from: {
+  //     type: 'row',
+  //     table: 'gdocs_example',
+  //     field: 'country',
+  //     from: 1,
+  //     to: 5
+  //   }
+  // },
+  // {
+  //   method:'trim',
+  //   fields: ['pais', 'extraido', 'label']
+  // },
+  // {
+  //   method: 'cast',
+  //   fields: [{
+  //     field: 'lat',
+  //     type: 'float',
+  //     args: []
+  //   }]
+  // },
+  // {
+  //   method: 'substr',
+  //   field: 'extra',
   //   start: 0,
-  //   numRows: 2
-  // },
-  {
-    method:'sort',
-    field: 'x',
-    order: 'desc'
-  },
-  {
-    method:'percentage',
-    field: 'x',
-    groupBy: 'country'
-  },
-  {
-    method:'rename',
-    oldName: 'country',
-    newName: 'pais'
-  },
-  // {
-  //   method:'groupBy',
-  //   field: 'pais'
-  // },
-  {
-    method:'delete',
-    field: 'date'
-  },
-  {
-    method:'add',
-    field: 'extraido',
-    type: 'column',
-    from: {
-      type: 'row',
-      table: 'gdocs_example',
-      field: 'country',
-      from: 1,
-      to: 5
-    }
-  },
-  {
-    method:'trim',
-    fields: ['pais', 'extraido', 'label']
-  },
-  {
-    method: 'cast',
-    fields: [{
-      field: 'lat',
-      type: 'float',
-      args: []
-    }]
-  },
-  {
-    method: 'substr',
-    field: 'extra',
-    start: 0,
-    end: 3
-  }
+  //   end: 3
+  // }
 ])
 .execute(function(data){
-  console.log(data);
+  console.log(_.pluck(data, 'total', 'SchoolId'));
 });

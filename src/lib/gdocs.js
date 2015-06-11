@@ -11,41 +11,41 @@ if (typeof module !== 'undefined' && module != null && typeof require !== 'undef
 (function(my) {
   my.__type__ = 'gdocs';
 
-  var Deferred = (typeof jQuery !== "undefined" && jQuery.Deferred) || _.Deferred;
-
   // Fetch data from a Google Docs spreadsheet.
   //
   // For details of config options and returned values see the README in
   // the repo at https://github.com/Recline/backend.gdocs/
   my.fetch = function(config) {
-    var dfd  = new Deferred();
+    var dfd = DQ.Deferred();
     var urls = my.getGDocsApiUrls(config.url, config.worksheetIndex);
 
     // TODO cover it with tests
     // get the spreadsheet title
     (function () {
-      var titleDfd = new Deferred();
+      var titleDfd = DQ.Deferred();
 
-      jQuery.getJSON(urls.spreadsheetAPI, function (d) {
-          titleDfd.resolve({
-              spreadsheetTitle: d.feed.title.$t
-          });
-      }) .fail(function(errObj) { titleDfd.reject(errObj); });
+      DQ.ajax(urls.spreadsheetAPI).get().then(function (d) {
+        var d = JSON.parse(d);
+        titleDfd.resolve({
+            spreadsheetTitle: d.feed.title.$t
+        });
+      }).catch(function(errObj) { titleDfd.reject(errObj); });
 
-      return titleDfd.promise();
+      return titleDfd.promise;
     }()).then(function (response) {
 
       // get the actual worksheet data
-      jQuery.getJSON(urls.worksheetAPI, function(d) {
+      DQ.ajax(urls.worksheetAPI).get().then(function(d) {
+        var d = JSON.parse(d);
         var result = my.parseData(d);
         var fields = _.map(result.fields, function(fieldId) {
           return {id: fieldId};
         });
 
         var metadata = _.extend(urls, {
-              title: response.spreadsheetTitle +" - "+ result.worksheetTitle,
-              spreadsheetTitle: response.spreadsheetTitle,
-              worksheetTitle  : result.worksheetTitle
+          title: response.spreadsheetTitle +" - "+ result.worksheetTitle,
+          spreadsheetTitle: response.spreadsheetTitle,
+          worksheetTitle  : result.worksheetTitle
         });
         dfd.resolve({
           metadata: metadata,
@@ -54,9 +54,9 @@ if (typeof module !== 'undefined' && module != null && typeof require !== 'undef
           useMemoryStore: true
         });
       });
-    }).fail(function(errObj) { dfd.reject(errObj); });
+    }).catch(function(errObj) { dfd.reject(errObj); });
 
-    return dfd.promise();
+    return dfd.promise;
   };
 
   // ## parseData
@@ -92,7 +92,7 @@ if (typeof module !== 'undefined' && module != null && typeof require !== 'undef
 
     // converts non numberical values that should be numerical (22.3%[string] -> 0.223[float])
     results.records = _.map(entries, function(entry) {
-      var row = new Map();
+      var row = {};
 
       _.each(results.fields, function(col) {
         var _keyname = 'gsx$' + col;
@@ -111,7 +111,6 @@ if (typeof module !== 'undefined' && module != null && typeof require !== 'undef
       });
       return row;
     });
-
     results.worksheetTitle = gdocsWorksheet.feed.title.$t;
     return results;
   };

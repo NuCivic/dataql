@@ -1,15 +1,11 @@
 var PapaCSV = {};
 
-// Note that provision of jQuery is optional (it is **only** needed if you use fetch on a remote file)
 (function(my) {
   "use strict";
   my.__type__ = 'papacsv';
 
-  // use either jQuery or Underscore Deferred depending on what is available
-  var Deferred = (typeof jQuery !== "undefined" && jQuery.Deferred) || _.Deferred;
-
   my.fetch = function(dataset) {
-    var dfd = new Deferred();
+    var dfd = DQ.Deferred();
     var config = { complete: _.partial(my._complete, _, dfd, dataset)};
 
     if (dataset.file) {
@@ -20,7 +16,7 @@ var PapaCSV = {};
       config.download = true;
       Papa.parse(dataset.url, config);
     }
-    return dfd.promise();
+    return dfd.promise;
   };
 
   my._complete = function(data, dfd, dataset){

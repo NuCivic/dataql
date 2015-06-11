@@ -5,13 +5,10 @@ var Inline = {};
   "use strict";
   my.__type__ = 'inline';
 
-  // use either jQuery or Underscore Deferred depending on what is available
-  var Deferred = (typeof jQuery !== "undefined" && jQuery.Deferred) || _.Deferred;
-
   my.fetch = function(dataset) {
-    var dfd = new Deferred();
-    _.defer(dfd.resolve, dataset);
-    return dfd.promise();
+    var dfd = DQ.Deferred();
+    dfd.resolve(dataset);
+    return dfd.promise;
   };
 
 }(Inline));

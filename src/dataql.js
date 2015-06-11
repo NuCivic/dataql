@@ -6,7 +6,7 @@
   /**
    * DataQL constructor
    */
-  function DataQL(){
+  function DQ(){
     var self = this;
 
     self._tables = [];
@@ -17,64 +17,46 @@
   /**
    * Comparators
    */
-  DataQL.operators = {};
+  DQ.operators = {};
 
   // Equal
-  DataQL.operators['='] = function(operand1, operand2) {
+  DQ.operators['='] = function(operand1, operand2) {
     return operand1 == operand2; // jshint ignore:line
   };
 
   // Greater than
-  DataQL.operators['>'] = function(operand1, operand2) {
+  DQ.operators['>'] = function(operand1, operand2) {
     return operand1 > operand2;
   };
 
   // Lower than
-  DataQL.operators['<'] = function(operand1, operand2) {
+  DQ.operators['<'] = function(operand1, operand2) {
     return operand1 < operand2;
   };
 
   // Greater or equal than
-  DataQL.operators['>='] = function(operand1, operand2) {
+  DQ.operators['>='] = function(operand1, operand2) {
     return operand1 >= operand2;
   };
 
   // Lower or equal than
-  DataQL.operators['<='] = function(operand1, operand2) {
+  DQ.operators['<='] = function(operand1, operand2) {
     return operand1 <= operand2;
   };
 
   /**
    * Get operator from string
    */
-  DataQL.prototype._normalizeTable = function(table) {
-    var self = this;
-
-    // Test if records is properly formated as objects.
-    if(_.first(table.records) instanceof Map)
-      return table;
-
-    // If not, Convert records to object.
-    table.records = _.map(table.records, function(record){
-      return _.object(table.fields, record);
-    });
-
-    return table;
-  };
-
-  /**
-   * Get operator from string
-   */
-  DataQL.prototype._getCmp = function(cmp) {
-    if(!_.isFunction(DataQL.operators[cmp]))
+  DQ.prototype._getCmp = function(cmp) {
+    if(!_.isFunction(DQ.operators[cmp]))
       throw new Error('Operator not supported');
-    return DataQL.operators[cmp];
+    return DQ.operators[cmp];
   };
 
   /**
    * Join tables
    */
-  DataQL.prototype._join = function(resources, result, params){
+  DQ.prototype._join = function(resources, result, params){
     var self = this;
     var toJoin = [];
     var cmp = self._getCmp(params.where.cmp);
@@ -103,7 +85,7 @@
   /**
    * Set table
    */
-  DataQL.prototype._set = function(resources, result, params){
+  DQ.prototype._set = function(resources, result, params){
     if(!_.has(resources, params.table))
       throw new Error('Table not fetched. Fetch and name the table before set.');
     return resources[params.table].records;
@@ -112,7 +94,7 @@
   /**
    * Filter rows (aka. sql where)
    */
-  DataQL.prototype._filter = function(resources, result, params){
+  DQ.prototype._filter = function(resources, result, params){
     var self = this;
     var cmp = self._getCmp(params.where.cmp);
 
@@ -124,14 +106,14 @@
   /**
    * Limit
    */
-  DataQL.prototype._limit = function(resources, result, params){
+  DQ.prototype._limit = function(resources, result, params){
     return result.slice(params.start, params.start + params.numRows);
   };
 
   /**
    * Sort by order
    */
-  DataQL.prototype._sort = function(resources, result, params){
+  DQ.prototype._sort = function(resources, result, params){
     var order = (params.order === 'desc') ? false : true;
     var field = params.field;
     return _.sortByOrder(result, field, order);
@@ -140,7 +122,7 @@
   /**
    * Rename a column
    */
-  DataQL.prototype._rename = function(resources, result, params){
+  DQ.prototype._rename = function(resources, result, params){
     return _.map(result, function(record){
       record[params.newName] = record[params.oldName];
       return _.omit(record, params.oldName);
@@ -150,7 +132,7 @@
   /**
    * Delete a column
    */
-  DataQL.prototype._delete = function(resources, result, params){
+  DQ.prototype._delete = function(resources, result, params){
     return _.map(result, function(record){
       return _.omit(record, params.field);
     });
@@ -159,7 +141,7 @@
   /**
    * Add columns or rows
    */
-  DataQL.prototype._add = function(resources, result, params){
+  DQ.prototype._add = function(resources, result, params){
     var self = this;
     var method = (params.type === 'column')
       ? 'addColumn'
@@ -171,7 +153,7 @@
   /**
    * Add column
    */
-  DataQL.prototype._addColumn = function(resources, result, params){
+  DQ.prototype._addColumn = function(resources, result, params){
     var self = this;
     var values = self._range(resources, result, params.from);
 
@@ -184,7 +166,7 @@
   /**
    * Add row
    */
-  DataQL.prototype._addRow = function(resources, result, params){
+  DQ.prototype._addRow = function(resources, result, params){
     var self = this;
     var values = self._range(resources, result, params.from);
     var fields = _.first(result).keys();
@@ -197,7 +179,7 @@
   /**
    * Group by field
    */
-  DataQL.prototype._groupBy = function(resources, result, params){
+  DQ.prototype._groupBy = function(resources, result, params){
     var grouped = _.values(_.groupBy(result, params.field));
     return _.map(grouped, function(record){
       return record[0];
@@ -210,7 +192,7 @@
    * and params as parameters because it's a helper
    * function and intended to be piped.
    */
-  DataQL.prototype._range = function(resources, result, params){
+  DQ.prototype._range = function(resources, result, params){
     var self = this;
     var method = (params.type === 'column')
       ? 'vectorFromColumns'
@@ -222,7 +204,7 @@
   /**
    * Create a vector from a columns
    */
-  DataQL.prototype._vectorFromColumns = function(resources, params){
+  DQ.prototype._vectorFromColumns = function(resources, params){
     // TODO: Add match pattern to match column names.
     var record = resources[params.table].records[params.row];
     var result = [];
@@ -242,7 +224,7 @@
   /**
    * Create a vector from row
    */
-  DataQL.prototype._vectorFromRows = function(resources, params){
+  DQ.prototype._vectorFromRows = function(resources, params){
     var records = resources[params.table].records;
 
     return _.reduce(records, function(acum, record, index) {
@@ -255,7 +237,7 @@
   /**
    * Run operations
    */
-  DataQL.prototype._runOps = function(){
+  DQ.prototype._runOps = function(){
     var self = this;
 
     _.each(self._operations, function(op){
@@ -273,14 +255,14 @@
    * Get a backend from its string representation.
    * @param  {String} backend  Backend string representation.
    */
-  DataQL.prototype._backendFromString = function(backend) {
+  DQ.prototype._backendFromString = function(backend) {
     return _.findWhere(recline.Backend, {__type__: backend});
   };
 
   /**
    * Fetch all the tables and place them into sources
    */
-  DataQL.prototype._fetchResources = function(){
+  DQ.prototype._fetchResources = function(){
     var self = this;
     var promises = [];
 
@@ -292,7 +274,7 @@
       promises.push(backend.fetch(table));
     });
 
-    return $.when.apply($, promises);
+    return Promise.all(promises);
   };
 
 
@@ -305,13 +287,13 @@
   /**
    * Trim
    */
-  DataQL.prototype._trim = function(resources, result, params){
+  DQ.prototype._trim = function(resources, result, params){
     var self = this;
     var fields = params.fields;
     return _.map(result, function(record){
       return _.mapValues(record, function(value, key){
         return _.includes(fields, key) ?
-          self.utils.trim(value) :
+          DQ.trim(value) :
           value;
       });
     });
@@ -320,7 +302,7 @@
   /**
    * Cast
    */
-  DataQL.prototype._cast = function(resources, result, params){
+  DQ.prototype._cast = function(resources, result, params){
     var self = this;
     var fields = _.pluck(params.fields, 'field');
 
@@ -330,7 +312,7 @@
           var field = _.findWhere(params.fields, {field: key});
           var type = field.type;
           var args = field.args;
-          return self.utils.cast.apply(null, [value, type].concat(args))
+          return DQ.cast.apply(null, [value, type].concat(args))
         }
         return value;
       });
@@ -340,7 +322,7 @@
   /**
    * Substring
    */
-  DataQL.prototype._substr = function(resources, result, params){
+  DQ.prototype._substr = function(resources, result, params){
     var self = this;
     var field = params.field;
     var start = params.start;
@@ -362,10 +344,10 @@
    * Define the tables do you want to use.
    * Use the recline format to define backends.
    */
-  DataQL.prototype.tables = function(){
+  DQ.prototype.tables = function(){
     var self = this;
 
-    if(self instanceof DataQL){
+    if(self instanceof DQ){
 
       // Fetched resources indexed by name
       self._resources = {};
@@ -374,7 +356,7 @@
       self._tables = _.toArray(arguments);
       return self;
     } else {
-      var ql = new DataQL();
+      var ql = new DQ();
       return ql.tables.apply(ql, _.toArray(arguments));
     }
 
@@ -384,7 +366,7 @@
   /**
    * Add an operation to the queue.
    */
-  DataQL.prototype.ops = function(ops){
+  DQ.prototype.ops = function(ops){
     var self = this;
     self._operations = ops;
     return self;
@@ -393,27 +375,19 @@
   /**
    * Perform the query.
    */
-  DataQL.prototype.execute = function(cb){
+  DQ.prototype.execute = function(cb){
     var self = this;
     var tableNames = _.pluck(self._tables, 'as');
 
-    self._fetchResources().done(function(){
-
-      // FIX ME: this could be removed transforming
-      // how csv parser works by returning maps
-      // instead of objects.
-      var normalized = _.map(
-        _.toArray(arguments),
-        self._normalizeTable,
-        self
-      );
-      self._resources = _.zipObject(tableNames, normalized);
+    self._fetchResources()
+    .then(function(data){
+      self._resources = _.zipObject(tableNames, data);
       self._runOps();
       cb(self._result);
     });
   };
 
   // Expose dataql constructor
-  global.DataQL = DataQL;
-  global.tables = DataQL.prototype.tables;
+  global.DQ = global.DQ = DQ;
+  global.tables = DQ.prototype.tables;
 })(window);

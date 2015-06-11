@@ -1,15 +1,12 @@
 var CSV = {};
 
-// Note that provision of jQuery is optional (it is **only** needed if you use fetch on a remote file)
 (function(my) {
   "use strict";
   my.__type__ = 'csv';
 
-  // use either jQuery or Underscore Deferred depending on what is available
-  var Deferred = (typeof jQuery !== "undefined" && jQuery.Deferred) || _.Deferred;
 
   my.fetch = function(dataset) {
-    var dfd = new Deferred();
+    var dfd = DQ.Deferred();
     if (dataset.file) {
       var reader = new FileReader();
       var encoding = dataset.encoding || 'UTF-8';
@@ -30,22 +27,24 @@ var CSV = {};
       out.useMemoryStore = true;
       dfd.resolve(out);
     } else if (dataset.url) {
-      jQuery.get(dataset.url).done(function(data) {
+      DQ.ajax(dataset.url).get().then(function(data) {
         var out = my.extractFields(my.parse(data, dataset), dataset);
         out.useMemoryStore = true;
         dfd.resolve(out);
       });
     }
-    return dfd.promise();
+    return dfd.promise;
   };
 
   // Convert array of rows in { records: [ ...] , fields: [ ... ] }
   // @param {Boolean} noHeaderRow If true assume that first row is not a header (i.e. list of fields but is data.
   my.extractFields = function(rows, noFields) {
     if (noFields.noHeaderRow !== true && rows.length > 0) {
+      var fields = rows[0];
+
       return {
-        fields: rows[0],
-        records: rows.slice(1)
+        fields: fields,
+        records: _.map(rows.slice(1), _.partial(_.zipObject, fields))
       }
     } else {
       return {
