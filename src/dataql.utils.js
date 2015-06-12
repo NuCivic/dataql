@@ -12,6 +12,12 @@
     'float': parseFloat
   };
 
+  DQ.__jsonp_unique = 0;
+
+  /**
+   * Ajax calls using promises.
+   * From https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
+   */
   DQ.trim = function(text){
     return text.replace(/^\s+|\s+$/gm,'');
   };
@@ -92,6 +98,51 @@
     };
   }
 
+  /**
+   * Gets a cross-domain json
+   * @param  {String} url
+   * @return {Promise}
+   * https://gist.github.com/132080/110d1b68d7328d7bfe7e36617f7df85679a08968
+   */
+  DQ.jsonp = function(url, error_timeout) {
+    var promise = new Promise( function (resolve, reject) {
+
+      var name = '_jsonp_' + DQ.__jsonp_unique++;
+      var paramGlue = url.match(/\?/) ? '&' : '?';
+      var script;
+      var timeout;
+
+      // Append callback function to the url
+      url +=  paramGlue + 'callback=' + name;
+
+      // Create script
+      script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = url;
+
+      timeout = setTimeout(function(){
+        reject({error: 'Request timeout'});
+      }, error_timeout || 5000);
+
+      // Setup handler
+      window[name] = function(data){
+        resolve(data);
+        window.clearTimeout(timeout);
+        document.getElementsByTagName('head')[0].removeChild(script);
+        script = null;
+        delete window[name];
+      };
+
+      // Load JSON
+      document.getElementsByTagName('head')[0].appendChild(script);
+    });
+    return promise;
+  }
+
+  /**
+   * Deferred polyfill
+   * From https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Promise.jsm/Deferred
+   */
   DQ.Deferred = function () {
     if (Promise && Promise.defer) {
       return Promise.defer();

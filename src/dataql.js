@@ -14,6 +14,8 @@
     self._result = [];
   }
 
+  global.__ = '__';
+
   /**
    * Comparators
    */
@@ -241,15 +243,33 @@
     var self = this;
 
     _.each(self._operations, function(op){
-      self._result = self['_' + op.method](
-        self._resources,
-        self._result,
-        _.omit(op, 'method')
-      );
+      var engine = _.capitalize(op.engine) || 'Native';
+      self._result = self['_run' + engine](self._resources, self._result, op);
     });
 
     return self;
   };
+
+  /**
+   * Run lodash
+   */
+  DQ.prototype._runLodash = function(resources, result, op){
+    var self = this;
+    return _[op.method].apply(result,[result].concat(op.args));
+  }
+
+  /**
+   * Run native
+   */
+  DQ.prototype._runNative = function(resources, result, op){
+    var self = this;
+
+    return self['_' + op.method](
+      resources,
+      result,
+      _.omit(op, 'method')
+    );
+  }
 
   /**
    * Get a backend from its string representation.
@@ -374,7 +394,7 @@
   /**
    * Perform the query.
    */
-  DQ.prototype.execute = function(cb){
+  DQ.prototype.commit = function(cb){
     var self = this;
     var tableNames = _.pluck(self._tables, 'as');
 

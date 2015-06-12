@@ -1,3 +1,6 @@
+Consolidate rows using regex or some euristics.
+
+
 crear una columna tomando los valores de N
 
 select('year')

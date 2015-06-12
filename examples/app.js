@@ -84,6 +84,16 @@ tables(t2)
     field: 'Achievement14E',
     groupBy: 'SchoolId'
   },
+  {
+    method: 'pluck',
+    engine:'lodash',
+    args: ['total']
+  },
+  {
+    method: 'first',
+    engine:'lodash',
+    args: []
+  },
   // {
   //   method:'rename',
   //   oldName: 'country',
@@ -128,6 +138,6 @@ tables(t2)
   //   end: 3
   // }
 ])
-.execute(function(data){
+.commit(function(data){
   console.log(data);
 });
