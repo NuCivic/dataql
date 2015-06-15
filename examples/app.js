@@ -52,12 +52,25 @@ var t3 = {
   as: 'inline_example'
 };
 
-/// TODO: Proxy loadsh functions.
-tables(t2)
+var t4 = {
+  backend: 'xlsx',
+  url: 'data/example.xlsx',
+  as: 'xlsx_example',
+  sheet: 'apollo-parsed-1737-325_0'
+};
+
+var t5 = {
+  backend: 'json',
+  url: 'http://demo.ckan.org/api/action/datastore_search?resource_id=f6331f99-51f6-44d9-95b9-b20f3b74f360',
+  as: 'json_example',
+  path: 'result.records'
+};
+
+tables(t5)
 .ops([
   {
     method: 'set',
-    table: 'csv_example'
+    table: 'json_example'
   },
   // {
   //   method: 'join',
@@ -78,22 +91,29 @@ tables(t2)
   //   field: 'x',
   //   order: 'desc'
   // },
-  {
-    method:'sum',
-    as: 'total',
-    field: 'Achievement14E',
-    groupBy: 'SchoolId'
-  },
-  {
-    method: 'pluck',
-    engine:'lodash',
-    args: ['total']
-  },
-  {
-    method: 'first',
-    engine:'lodash',
-    args: []
-  },
+  // {
+  //   method:'sum',
+  //   as: 'total',
+  //   field: 'Achievement14E',
+  //   groupBy: 'SchoolId'
+  // },
+  // {
+  //   method:'format',
+  //   format: 'csv',
+  // },
+  // {
+  //   method:'download'
+  // },
+  // {
+  //   method: 'pluck',
+  //   engine:'lodash',
+  //   args: ['total']
+  // },
+  // {
+  //   method: 'first',
+  //   engine:'lodash',
+  //   args: []
+  // },
   // {
   //   method:'rename',
   //   oldName: 'country',

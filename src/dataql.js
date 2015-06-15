@@ -189,6 +189,23 @@
   };
 
   /**
+   * Format to any available output
+   */
+  DQ.prototype._format = function(resources, result, params){
+    return DQ.fmt['to' + params.format.toUpperCase()](result);
+  };
+
+  /**
+   * Save the output as any available format.
+   */
+  DQ.prototype._download = function(resources, result, params){
+    var type = {type: params.type || 'text/plain;charset=utf-8'};
+    var blob = new Blob([result], type);
+    saveAs(blob, params.filename || 'download.txt');
+    return result;
+  };
+
+  /**
    * Create a vector either from a row or a column.
    * Unlike other function this recieve only resources
    * and params as parameters because it's a helper

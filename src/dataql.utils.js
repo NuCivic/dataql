@@ -58,7 +58,7 @@
               }
             }
           }
-
+          client.responseType = 'arraybuffer';
           client.open(method, uri);
           client.send();
 

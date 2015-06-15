@@ -6,10 +6,12 @@ module.exports = function(grunt) {
     'src/lib/csv.js',
     'src/lib/gdocs.js',
     'src/lib/inline.js',
+    'src/lib/json.js',
+    'src/lib/xlsx.js',
     'src/lib/papaparse.js',
     'src/dataql.aggregations.js',
-    'src/dataql.queryparser.js',
     'src/dataql.utils.js',
+    'src/dataql.formatters.js',
   ]
 
   grunt.initConfig({

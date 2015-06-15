@@ -1,6 +1,6 @@
 /*jshint -W030 */
 
-;(function(global){
+;(function(global, DQ){
   'use strict';
 
   /**********************
@@ -166,4 +166,4 @@
     }, {}));
   };
 
-})(window);
+})(window, DQ);
