@@ -66,11 +66,10 @@ var t5 = {
   path: 'result.records'
 };
 
-tables(t5)
-.ops([
+var query = tables(t1).ops([
   {
     method: 'set',
-    table: 'json_example'
+    table: 'gdocs_example'
   },
   // {
   //   method: 'join',
@@ -111,8 +110,7 @@ tables(t5)
   // },
   // {
   //   method: 'first',
-  //   engine:'lodash',
-  //   args: []
+  //   engine:'lodash'
   // },
   // {
   //   method:'rename',
@@ -141,23 +139,21 @@ tables(t5)
   // },
   // {
   //   method:'trim',
-  //   fields: ['pais', 'extraido', 'label']
+  //   field: 'pais'
+  //   engine: 'lodash',
   // },
-  // {
-  //   method: 'cast',
-  //   fields: [{
-  //     field: 'lat',
-  //     type: 'float',
-  //     args: []
-  //   }]
-  // },
-  // {
-  //   method: 'substr',
-  //   field: 'extra',
-  //   start: 0,
-  //   end: 3
-  // }
-])
-.commit(function(data){
+  {
+    method: 'cast',
+    field: 'lat',
+    args: ['float']
+  },
+  {
+    method: 'substr',
+    field: 'extra',
+    args: [0, 3]
+  }
+]).commit(function(data){
   console.log(data);
 });
+
+console.log(query.serialize());

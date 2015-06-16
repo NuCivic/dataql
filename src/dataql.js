@@ -272,7 +272,7 @@
    */
   DQ.prototype._runLodash = function(resources, result, op){
     var self = this;
-    return _[op.method].apply(result,[result].concat(op.args));
+    return _[op.method].apply(result,[result].concat(op.args) || []);
   }
 
   /**
@@ -322,18 +322,24 @@
   ****************************/
 
   /**
+   * Transform field
+   */
+  DQ.prototype._transformField = function(result, params, predicate){
+    return _.map(result, function(record){
+      return _.mapValues(record, function(value, key){
+        return (params.field === key)
+          ? predicate.apply(value, [value].concat(params.args))
+          : value;
+      });
+    });
+  };
+
+  /**
    * Trim
    */
   DQ.prototype._trim = function(resources, result, params){
     var self = this;
-    var fields = params.fields;
-    return _.map(result, function(record){
-      return _.mapValues(record, function(value, key){
-        return _.includes(fields, key) ?
-          DQ.trim(value) :
-          value;
-      });
-    });
+    return self._transformField(result, params, _.trim);
   };
 
   /**
@@ -341,19 +347,7 @@
    */
   DQ.prototype._cast = function(resources, result, params){
     var self = this;
-    var fields = _.pluck(params.fields, 'field');
-
-    return _.map(result, function(record){
-      return _.mapValues(record, function(value, key){
-        if( _.contains(fields, key)) {
-          var field = _.findWhere(params.fields, {field: key});
-          var type = field.type;
-          var args = field.args;
-          return DQ.cast.apply(null, [value, type].concat(args))
-        }
-        return value;
-      });
-    });
+    return self._transformField(result, params, DQ.cast);
   };
 
   /**
@@ -361,14 +355,23 @@
    */
   DQ.prototype._substr = function(resources, result, params){
     var self = this;
-    var field = params.field;
-    var start = params.start;
-    var end = params.end;
+    return self._transformField(result, params, DQ.substr);
+  };
 
-    return _.map(result, function(record){
-      record[field] = String(record[field]).substring(start, end);
-      return record;
-    });
+  /**
+   * Truncates string if it’s longer than the given maximum string length.
+   */
+  DQ.prototype._trunc = function(resources, result, params){
+    var self = this;
+    return self._transformField(result, params, _.trunc);
+  };
+
+  /**
+   * Capitalize
+   */
+  DQ.prototype._capitalize = function(resources, result, params){
+    var self = this;
+    return self._transformField(result, params, _.capitalize);
   };
 
   /**********************
@@ -378,7 +381,7 @@
   **********************/
 
   /**
-   * Define the tables do you want to use.
+   * Define the tables you want to use.
    */
   DQ.prototype.tables = function(){
     var self = this;
@@ -404,8 +407,45 @@
    */
   DQ.prototype.ops = function(ops){
     var self = this;
+    if(!arguments.length) return self._operations;
     self._operations = ops;
     return self;
+  };
+
+  /**
+   * Creates a serialized version
+   * of the current query
+   */
+  DQ.prototype.serialize = function(){
+    var self = this;
+    return JSON.stringify(self.toObject());
+  };
+
+  /**
+   * Load a serialized version
+   * of the current query
+   */
+  DQ.prototype.unserialize = function(serialized){
+    var self = this;
+    var obj = JSON.parse(serialized);
+    self._tables = obj.tables;
+    self._operations = obj.operations;
+    return self;
+  };
+
+  /**
+   * Creates an object version
+   * of the current query
+   */
+  DQ.prototype.toObject = function(){
+    var self = this;
+
+    var obj = {
+      tables: self._tables,
+      operations: self._operations
+    };
+
+    return obj;
   };
 
   /**
@@ -421,6 +461,8 @@
       self._runOps();
       cb(self._result);
     });
+
+    return self;
   };
 
   // Expose dataql constructor

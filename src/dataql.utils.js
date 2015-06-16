@@ -14,17 +14,14 @@
 
   DQ.__jsonp_unique = 0;
 
-  /**
-   * Ajax calls using promises.
-   * From https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
-   */
-  DQ.trim = function(text){
-    return text.replace(/^\s+|\s+$/gm,'');
-  };
 
   DQ.cast = function(value, type){
     var rest = _.drop(_.toArray(arguments), 2);
     return castMap[type].apply(null, [value].concat(rest));
+  };
+
+  DQ.substr = function(value, start, end){
+    return value.substring(start, end);
   };
 
   /**
@@ -58,7 +55,6 @@
               }
             }
           }
-          client.responseType = 'arraybuffer';
           client.open(method, uri);
           client.send();
 
