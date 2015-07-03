@@ -1,23 +1,26 @@
+/*global DQ: true*/
+/*jshint camelcase: false */
+
 var DQ = DQ || {};
 DQ.backends = DQ.backends || {};
 DQ.backends.XLSX = {};
 
 (function(my) {
-  "use strict";
+  'use strict';
   my.__type__ = 'xlsx';
 
   my.fetch = function(dataset) {
 
-    var dfd = DQ.Deferred();
+    var dfd = new DQ.Deferred();
     DQ.ajax(dataset.url)
     .get({responseType: 'arraybuffer'})
     .then(function(d) {
       var out = {};
       var data = new Uint8Array(d);
-      var arr = new Array();
-      for(var i = 0; i != data.length; ++i) arr[i] = String.fromCharCode(data[i]);
+      var arr = [];
+      for(var i = 0; i !== data.length; ++i) arr[i] = String.fromCharCode(data[i]);
       var bstr = arr.join('');
-      var workbook = XLSX.read(bstr, {type:"binary"});
+      var workbook = XLSX.read(bstr, {type: 'binary' });
       out.fields = my.extractFields(workbook.Sheets[dataset.sheet]);
       out.records = my.extractData(workbook.Sheets[dataset.sheet], out.fields);
       dfd.resolve(out);
@@ -33,12 +36,12 @@ DQ.backends.XLSX = {};
 
     for(C = range.s.c; C <= range.e.c; ++C) {
         var cell = sheet[XLSX.utils.encode_cell({c:C, r:R})];
-        var hdr = "UNKNOWN " + C;
+        var hdr = 'UNKNOWN ' + C;
         if(cell && cell.t) hdr = XLSX.utils.format_cell(cell);
         headers.push(hdr);
     }
     return headers;
-  }
+  };
 
   my.extractData = function(sheet, headers) {
     var result = [];
@@ -56,7 +59,8 @@ DQ.backends.XLSX = {};
       result.push(row);
     }
     return result;
-  }
+  };
+
 }(DQ.backends.XLSX));
 
 

@@ -12,6 +12,6 @@
       fields: fields,
       records: data
     });
-  }
+  };
 
 })(window, DQ);

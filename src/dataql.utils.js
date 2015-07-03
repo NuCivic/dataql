@@ -12,7 +12,7 @@
     'float': parseFloat
   };
 
-  DQ.__jsonp_unique = 0;
+  DQ.__jsonpUnique = 0;
 
 
   DQ.cast = function(value, type){
@@ -55,20 +55,20 @@
               }
             }
           }
-          client.open(method, uri);
+          client.open(method, uri, true);
           client.send();
 
           client.onload = function () {
-            if (this.status == 200) {
+            if (Number(client.status) === 200) {
               // Performs the function "resolve" when this.status is equal to 200
-              resolve(this.response);
+              resolve(client.response);
             } else {
               // Performs the function "reject" when this.status is different than 200
-              reject(this.statusText);
+              reject(client.statusText);
             }
           };
           client.onerror = function () {
-            reject(this.statusText);
+            reject(client.statusText);
           };
         });
 
@@ -92,7 +92,7 @@
         return core.ajax('DELETE', url, args);
       }
     };
-  }
+  };
 
   /**
    * Gets a cross-domain json
@@ -100,10 +100,10 @@
    * @return {Promise}
    * https://gist.github.com/132080/110d1b68d7328d7bfe7e36617f7df85679a08968
    */
-  DQ.jsonp = function(url, error_timeout) {
+  DQ.jsonp = function(url, errorTimeout) {
     var promise = new Promise( function (resolve, reject) {
 
-      var name = '_jsonp_' + DQ.__jsonp_unique++;
+      var name = '_jsonp_' + DQ.__jsonpUnique++;
       var paramGlue = url.match(/\?/) ? '&' : '?';
       var script;
       var timeout;
@@ -118,7 +118,7 @@
 
       timeout = setTimeout(function(){
         reject({error: 'Request timeout'});
-      }, error_timeout || 5000);
+      }, errorTimeout || 5000);
 
       // Setup handler
       window[name] = function(data){
@@ -133,16 +133,16 @@
       document.getElementsByTagName('head')[0].appendChild(script);
     });
     return promise;
-  }
+  };
 
   /**
    * Deferred polyfill
    * From https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Promise.jsm/Deferred
    */
   DQ.Deferred = function () {
-    if (Promise && Promise.defer) {
+    if (typeof Promise !== 'undefined' && Promise.defer) {
       return Promise.defer();
-    } else if (PromiseUtils && PromiseUtils.defer) {
+    } else if (typeof PromiseUtils !== 'undefined' && PromiseUtils.defer) {
       return PromiseUtils.defer();
     } else {
       try {
@@ -158,6 +158,6 @@
         throw new Error('Promise/Deferred is not available');
       }
     }
-  }
+  };
 
 })(window);

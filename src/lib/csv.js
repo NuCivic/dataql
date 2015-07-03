@@ -1,12 +1,15 @@
+/*global DQ: true*/
+/*global CSV: true*/
+
 var CSV = {};
 
 (function(my) {
-  "use strict";
+  'use strict';
   my.__type__ = 'csv';
 
 
   my.fetch = function(dataset) {
-    var dfd = DQ.Deferred();
+    var dfd = new DQ.Deferred();
     if (dataset.file) {
       var reader = new FileReader();
       var encoding = dataset.encoding || 'UTF-8';
@@ -15,11 +18,11 @@ var CSV = {};
         out.useMemoryStore = true;
         out.metadata = {
           filename: dataset.file.name
-        }
+        };
         dfd.resolve(out);
       };
       reader.onerror = function (e) {
-        alert('Failed to load file. Code: ' + e.target.error.code);
+        console.log('Failed to load file. Code: ' + e.target.error.code);
       };
       reader.readAsText(dataset.file, encoding);
     } else if (dataset.data) {
@@ -45,11 +48,11 @@ var CSV = {};
       return {
         fields: fields,
         records: _.map(rows.slice(1), _.partial(_.zipObject, fields))
-      }
+      };
     } else {
       return {
         records: rows
-      }
+      };
     }
   };
 
@@ -65,7 +68,7 @@ var CSV = {};
     };
     for (var key in options) {
       if (key === 'trim') {
-        out['skipinitialspace'] = options.trim;
+        out.skipinitialspace = options.trim;
       } else {
         out[key.toLowerCase()] = options[key];
       }
@@ -118,12 +121,12 @@ var CSV = {};
       cur = s.charAt(i);
 
       // If we are at a EOF or EOR
-      if (inQuote === false && (cur === options.delimiter || cur === "\n")) {
+      if (inQuote === false && (cur === options.delimiter || cur === '\n')) {
         field = processField(field);
         // Add the current field to the current row
         row.push(field);
         // If this is EOR append row to output and flush row
-        if (cur === "\n") {
+        if (cur === '\n') {
           out.push(row);
           row = [];
         }
@@ -168,20 +171,23 @@ var CSV = {};
   my.objectToArray = function(dataToSerialize) {
     var a = [];
     var fieldNames = [];
-    for (var ii=0; ii<dataToSerialize.fields.length; ii++) {
+    var ii;
+    var jj;
+
+    for (ii = 0; ii < dataToSerialize.fields.length; ii++) {
       fieldNames.push(dataToSerialize.fields[ii].id);
     }
     a.push(fieldNames);
-    for (var ii=0; ii<dataToSerialize.records.length; ii++) {
+    for (ii = 0; ii < dataToSerialize.records.length; ii++) {
       var tmp = [];
       var record = dataToSerialize.records[ii];
-      for (var jj=0; jj<fieldNames.length; jj++) {
+      for (jj = 0; jj < fieldNames.length; jj++) {
         tmp.push(record[fieldNames[jj]]);
       }
       a.push(tmp);
     }
     return a;
-  }
+  };
 
   // ## serialize
   //
@@ -210,13 +216,13 @@ var CSV = {};
       if (field === null) {
         // If field is null set to empty string
         field = '';
-      } else if (typeof field === "string" && rxNeedsQuoting.test(field)) {
+      } else if (typeof field === 'string' && rxNeedsQuoting.test(field)) {
         if (options.doublequote) {
           field = field.replace(/"/g, '""');
         }
         // Convert string to delimited string
         field = options.quotechar + field + options.quotechar;
-      } else if (typeof field === "number") {
+      } else if (typeof field === 'number') {
         // Convert number to string
         field = field.toString(10);
       }
@@ -232,7 +238,7 @@ var CSV = {};
         // If this is EOR append row to output and flush row
         if (j === (cur.length - 1)) {
           row += field;
-          out += row + "\n";
+          out += row + '\n';
           row = '';
         } else {
           // Add the current field to the current row
@@ -266,7 +272,7 @@ var CSV = {};
     }());
 
   function chomp(s) {
-    if (s.charAt(s.length - 1) !== "\n") {
+    if (s.charAt(s.length - 1) !== '\n') {
       // Does not end with \n, just return string
       return s;
     } else {

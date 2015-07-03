@@ -66,6 +66,7 @@ var t5 = {
   path: 'result.records'
 };
 
+
 var query = tables(t1).ops([
   {
     method: 'set',
@@ -144,16 +145,15 @@ var query = tables(t1).ops([
   // },
   {
     method: 'cast',
-    field: 'lat',
+    field: 'lon',
     args: ['float']
   },
-  {
-    method: 'substr',
-    field: 'extra',
-    args: [0, 3]
-  }
+  // {
+  //   method: 'substr',
+  //   field: 'extra',
+  //   args: [0, 1]
+  // }
 ]).commit(function(data){
   console.log(data);
 });
 
-console.log(query.serialize());

@@ -145,9 +145,9 @@
    */
   DQ.prototype._add = function(resources, result, params){
     var self = this;
-    var method = (params.type === 'column')
-      ? 'addColumn'
-      : 'addRow';
+    var method = (params.type === 'column') ?
+      'addColumn' :
+      'addRow' ;
 
     return self['_' + method](resources, result, params);
   };
@@ -213,9 +213,9 @@
    */
   DQ.prototype._range = function(resources, result, params){
     var self = this;
-    var method = (params.type === 'column')
-      ? 'vectorFromColumns'
-      : 'vectorFromRows';
+    var method = (params.type === 'column') ?
+      'vectorFromColumns' :
+      'vectorFromRows' ;
 
     return self['_' + method](resources, params);
   };
@@ -273,7 +273,7 @@
   DQ.prototype._runLodash = function(resources, result, op){
     var self = this;
     return _[op.method].apply(result,[result].concat(op.args) || []);
-  }
+  };
 
   /**
    * Run native
@@ -286,7 +286,7 @@
       result,
       _.omit(op, 'method')
     );
-  }
+  };
 
   /**
    * Get a backend from its string representation.
@@ -307,7 +307,6 @@
       var backend = self._backendFromString(table.backend);
 
       if(!backend) throw new Error('Backend not found');
-
       promises.push(backend.fetch(table));
     });
 
@@ -327,9 +326,9 @@
   DQ.prototype._transformField = function(result, params, predicate){
     return _.map(result, function(record){
       return _.mapValues(record, function(value, key){
-        return (params.field === key)
-          ? predicate.apply(value, [value].concat(params.args))
-          : value;
+        return (params.field === key) ?
+          predicate.apply(value, [value].concat(params.args)) :
+          value ;
       });
     });
   };
@@ -425,9 +424,9 @@
    * Load a serialized version
    * of the current query
    */
-  DQ.prototype.unserialize = function(serialized){
+  DQ.prototype.load = function(serialized){
     var self = this;
-    var obj = JSON.parse(serialized);
+    var obj = (_.isString(serialized)) ? JSON.parse(serialized) : serialized;
     self._tables = obj.tables;
     self._operations = obj.operations;
     return self;

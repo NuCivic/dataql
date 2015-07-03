@@ -6,13 +6,14 @@ module.exports = function(grunt) {
     'src/lib/csv.js',
     'src/lib/gdocs.js',
     'src/lib/inline.js',
+    'src/lib/report.js',
     'src/lib/json.js',
     'src/lib/xlsx.js',
     'src/lib/papaparse.js',
     'src/dataql.aggregations.js',
     'src/dataql.utils.js',
     'src/dataql.formatters.js',
-  ]
+  ];
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -53,7 +54,7 @@ module.exports = function(grunt) {
         }
       }
     },
-    watch_debug: {
+    watchDebug: {
       all: {
         files: files.concat('examples/*.js'),
         tasks: ['concat'],
@@ -99,7 +100,7 @@ module.exports = function(grunt) {
   grunt.registerTask('build', [
     'jshint',
     'concat',
-    'uglify',
+    // 'uglify',
   ]);
 
   grunt.registerTask('debug', [

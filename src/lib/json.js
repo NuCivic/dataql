@@ -1,3 +1,5 @@
+/*global DQ: true*/
+
 var DQ = DQ || {};
 DQ.backends = DQ.backends || {};
 DQ.backends.JSON = {};
@@ -7,7 +9,7 @@ DQ.backends.JSON = {};
   my.__type__ = 'json';
 
   my.fetch = function(dataset) {
-    var dfd = DQ.Deferred();
+    var dfd = new DQ.Deferred();
 
     DQ.jsonp(dataset.url).then(function(data){
       var out = {};

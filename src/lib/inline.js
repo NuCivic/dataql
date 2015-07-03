@@ -1,11 +1,14 @@
+/*global DQ: true*/
+/*global Inline: true*/
+
 var Inline = {};
 
 (function(my) {
-  "use strict";
+  'use strict';
   my.__type__ = 'inline';
 
   my.fetch = function(dataset) {
-    var dfd = DQ.Deferred();
+    var dfd = new DQ.Deferred();
     dfd.resolve(dataset);
     return dfd.promise;
   };

@@ -1,6 +1,9 @@
+/*global DQ: true*/
+
 var GDocs = {};
 
 (function(my) {
+  'use strict';
   my.__type__ = 'gdocs';
 
   // Fetch data from a Google Docs spreadsheet.
@@ -8,16 +11,16 @@ var GDocs = {};
   // For details of config options and returned values see the README in
   // the repo at https://github.com/Recline/backend.gdocs/
   my.fetch = function(config) {
-    var dfd = DQ.Deferred();
+    var dfd = new DQ.Deferred();
     var urls = my.getGDocsApiUrls(config.url, config.worksheetIndex);
 
     // TODO cover it with tests
     // get the spreadsheet title
     (function () {
-      var titleDfd = DQ.Deferred();
+      var titleDfd = new DQ.Deferred();
 
       DQ.ajax(urls.spreadsheetAPI).get().then(function (d) {
-        var d = JSON.parse(d);
+        d = JSON.parse(d);
         titleDfd.resolve({
             spreadsheetTitle: d.feed.title.$t
         });
@@ -28,14 +31,14 @@ var GDocs = {};
 
       // get the actual worksheet data
       DQ.ajax(urls.worksheetAPI).get().then(function(d) {
-        var d = JSON.parse(d);
+        d = JSON.parse(d);
         var result = my.parseData(d);
         var fields = _.map(result.fields, function(fieldId) {
           return {id: fieldId};
         });
 
         var metadata = _.extend(urls, {
-          title: response.spreadsheetTitle +" - "+ result.worksheetTitle,
+          title: response.spreadsheetTitle + ' - ' + result.worksheetTitle,
           spreadsheetTitle: response.spreadsheetTitle,
           worksheetTitle  : result.worksheetTitle
         });
@@ -62,7 +65,7 @@ var GDocs = {};
   //
   // Issues: seems google docs return columns in rows in random order and not even sure whether consistent across rows.
   my.parseData = function(gdocsWorksheet, options) {
-    var options  = options || {};
+    options  = options || {};
     var colTypes = options.colTypes || {};
     var results = {
       fields : [],
@@ -112,12 +115,13 @@ var GDocs = {};
   // @param url: url to gdoc to the GDoc API (or just the key/id for the Google Doc)
   my.getGDocsApiUrls = function(url, worksheetIndex) {
     // https://docs.google.com/spreadsheet/ccc?key=XXXX#gid=YYY
-    var regex = /.*spreadsheet\/ccc\?.*key=([^#?&+]+)[^#]*(#gid=([\d]+).*)?/,
+    var regex = /.*spreadsheet\/ccc\?.*key=([^#?&+]+)[^#]*(#gid=([\d]+).*)?/;
       // new style is https://docs.google.com/a/okfn.org/spreadsheets/d/16DayFB.../edit#gid=910481729
-      regex2 = /.*spreadsheets\/d\/([^\/]+)\/edit(#gid=([\d]+).*)?/
-      matches = url.match(regex),
-      matches2 = url.match(regex2)
-      ;
+    var regex2 = /.*spreadsheets\/d\/([^\/]+)\/edit(#gid=([\d]+).*)?/;
+    var matches = url.match(regex);
+    var matches2 = url.match(regex2);
+    var key;
+    var worksheet;
 
     if (!!matches) {
         key = matches[1];
@@ -129,19 +133,12 @@ var GDocs = {};
     }
     else if (!!matches2) {
       key = matches2[1];
-      // force worksheet index always to be 1 since it appears API worksheet
-      // index does not follow gid (is always just index of worksheet)
-      // e.g. see this worksheet https://docs.google.com/a/okfn.org/spreadsheets/d/1S8NhNf6KsrAzdaY_epSlyc2pHXRLV-z6Ty2jL9hM5A4/edit#gid=406828788
-      // gid are large numbers but for actual access use worksheet index 1 and 2 ...
-      // https://spreadsheets.google.com/feeds/list/1S8NhNf6KsrAzdaY_epSlyc2pHXRLV-z6Ty2jL9hM5A4/2/public/values?alt=json
-      // answer here is that clients will always have to explicitly set worksheet index if they want anything other than first sheet
-      // worksheet = parseInt(matches2[3]);
       worksheet = 1;
       if (isNaN(worksheet)) {
         worksheet = 1;
       }
     }
-    else if (url.indexOf('spreadsheets.google.com/feeds') != -1) {
+    else if (url.indexOf('spreadsheets.google.com/feeds') !== -1) {
         // we assume that it's one of the feeds urls
         key = url.split('/')[5];
         // by default then, take first worksheet

@@ -46,18 +46,18 @@
 
       if (gb in acum) {
         previous = Number(acum[gb][f]);
-        acum[gb]['__total'] = Number(acum[gb]['__total']) + current;
-        acum[gb]['__count'] = previous + 1;
+        acum[gb].__total = Number(acum[gb].__total) + current;
+        acum[gb].__count = previous + 1;
       } else {
         acum[gb] = record;
-        acum[gb]['__total'] = current;
-        acum[gb]['__count'] = 1;
+        acum[gb].__total = current;
+        acum[gb].__count = 1;
       }
       return acum;
     }, {}));
 
     return _.map(precomputed, function(record, index) {
-      record[as] = record['__total'] / record['__count'];
+      record[as] = record.__total / record.__count;
       return _.omit(record, '__total', '__count');
     });
   };
@@ -77,17 +77,17 @@
       var current = Number(record[f]);
 
       if (gb in acum) {
-        acum[gb]['__total'] = Number(acum[gb]['__total']) + current;
+        acum[gb].__total = Number(acum[gb].__total) + current;
       } else {
         acum[gb] = record;
-        acum[gb]['__total'] = current;
+        acum[gb].__total = current;
       }
       total += current;
       return acum;
     }, {}));
 
     return _.map(precomputed, function(record, index) {
-      record[as] = record['__total'] / total;
+      record[as] = record.__total / total;
       return _.omit(record, '__total');
     });
   };

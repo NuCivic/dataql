@@ -1,11 +1,13 @@
+/*global DQ: true*/
+
 var PapaCSV = {};
 
 (function(my) {
-  "use strict";
+  'use strict';
   my.__type__ = 'papacsv';
 
   my.fetch = function(dataset) {
-    var dfd = DQ.Deferred();
+    var dfd = new DQ.Deferred();
     var config = { complete: _.partial(my._complete, _, dfd, dataset)};
 
     if (dataset.file) {
@@ -32,11 +34,11 @@ var PapaCSV = {};
       return {
         fields: rows[0],
         records: rows.slice(1)
-      }
+      };
     } else {
       return {
         records: rows
-      }
+      };
     }
   };
 
