@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/NuCivic/dataql.svg?branch=master)](https://travis-ci.org/NuCivic/dataql)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 DataQL
 ===============================================================================
@@ -58,7 +62,7 @@ var query = tables({
 });
 ```
 
-### Operations
+### Transforms
 An array of transforms to be run over the data. 
 
 ```javascript
@@ -66,7 +70,7 @@ var query = tables({
   url: 'http://demo.getdkan.com/sites/default/files/us_foreclosures_jan_2012_by_state_0.csv', // jshint ignore:line
   backend:'csv',
   as: 'us_foreclosure',
-}).ops([
+}).transform([
 
 ]);
 ```
