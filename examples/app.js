@@ -66,12 +66,21 @@ var t5 = {
   path: 'result.records'
 };
 
+tables(t1)
+  .rename('country', 'pais')
+  .set('gdocs_example')
+  .commit(function(data){
+    console.log(data);
+  });
 
-var query = tables(t1).ops([
-  {
-    method: 'set',
-    table: 'gdocs_example'
-  },
+
+var ql = new DQ();
+
+  // query.transforms([
+  // {
+  //   method: 'set',
+  //   table: 'gdocs_example'
+  // },
   // {
   //   method: 'join',
   //   table: 'gdocs_example',
@@ -81,11 +90,11 @@ var query = tables(t1).ops([
   //   method: 'filter',
   //   where: {cmp: '<', left:'id', right: 300}
   // },
-  // // {
-  // //   method:'limit',
-  // //   start: 0,
-  // //   numRows: 2
-  // // },
+  // {
+  //   method:'limit',
+  //   start: 0,
+  //   numRows: 2
+  // },
   // {
   //   method:'sort',
   //   field: 'x',
@@ -118,10 +127,10 @@ var query = tables(t1).ops([
   //   oldName: 'country',
   //   newName: 'pais'
   // },
-  // // {
-  // //   method:'groupBy',
-  // //   field: 'pais'
-  // // },
+  // {
+  //   method:'groupBy',
+  //   field: 'pais'
+  // },
   // {
   //   method:'delete',
   //   field: 'date'
@@ -143,17 +152,17 @@ var query = tables(t1).ops([
   //   field: 'pais'
   //   engine: 'lodash',
   // },
-  {
-    method: 'cast',
-    field: 'lon',
-    args: ['float']
-  },
+  // {
+  //   method: 'cast',
+  //   field: 'lon',
+  //   args: ['float']
+  // },
   // {
   //   method: 'substr',
   //   field: 'extra',
   //   args: [0, 1]
   // }
-]).commit(function(data){
-  console.log(data);
-});
+  // ]).commit(function(data){
+  //   console.log(data);
+  // });
 

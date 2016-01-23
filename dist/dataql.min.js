@@ -10,8 +10,9 @@
     var self = this;
 
     self._tables = [];
-    self._operations = [];
+    self._transforms = [];
     self._result = [];
+    self._fetched = false;
   }
 
   global.__ = '__';
@@ -90,8 +91,9 @@
   DQ.prototype._set = function(resources, result, params){
     if(!_.has(resources, params.table))
       throw new Error('Table not fetched. Fetch and name the table before set.');
-    return resources[params.table].records;
+    return _.clone(resources[params.table].records);
   };
+
 
   /**
    * Filter rows (aka. sql where)
@@ -254,14 +256,14 @@
   };
 
   /**
-   * Run operations
+   * Run transforms
    */
-  DQ.prototype._runOps = function(){
+  DQ.prototype._runTransforms = function(){
     var self = this;
 
-    _.each(self._operations, function(op){
-      var engine = _.capitalize(op.engine) || 'Native';
-      self._result = self['_run' + engine](self._resources, self._result, op);
+    _.each(self._transforms, function(T){
+      var engine = _.capitalize(T.engine) || 'Native';
+      self._result = self['_run' + engine](self._resources, self._result, T);
     });
 
     return self;
@@ -270,21 +272,21 @@
   /**
    * Run lodash
    */
-  DQ.prototype._runLodash = function(resources, result, op){
+  DQ.prototype._runLodash = function(resources, result, T){
     var self = this;
-    return _[op.method].apply(result,[result].concat(op.args) || []);
+    return _[T.method].apply(result,[result].concat(T.args) || []);
   };
 
   /**
    * Run native
    */
-  DQ.prototype._runNative = function(resources, result, op){
+  DQ.prototype._runNative = function(resources, result, T){
     var self = this;
 
-    return self['_' + op.method](
+    return self['_' + T.method](
       resources,
       result,
-      _.omit(op, 'method')
+      _.omit(T, 'method')
     );
   };
 
@@ -373,6 +375,15 @@
     return self._transformField(result, params, _.capitalize);
   };
 
+  /**
+   * Clear
+   */
+  DQ.prototype._clear = function(){
+    var self = this;
+    self._result.length = 0;
+  };
+
+
   /**********************
   *                     *
   *     PUBLIC API      *
@@ -402,13 +413,59 @@
   };
 
   /**
+   * Queue a set transform
+   */
+  DQ.prototype.set = function(resource){
+    this._transforms.push({
+      method: 'set',
+      table: resource
+    });
+    return this;
+  };
+
+  /**
+   * Queue a rename transform
+   */
+  DQ.prototype.rename = function(oldName, newName){
+    this._transforms.push({
+      oldName: oldName,
+      newName: newName,
+      method: 'rename',
+    });
+    return this;
+  };
+
+  /**
    * Add an operation to the queue.
    */
-  DQ.prototype.ops = function(ops){
+  DQ.prototype.transforms = function(transforms){
     var self = this;
-    if(!arguments.length) return self._operations;
-    self._operations = ops;
+    if(!arguments.length) return self._transforms;
+    self._clear();
+    self._transforms = transforms;
+    if(self._fetched) {
+      self._runTransforms();
+      return _.clone(self._result);
+    }
     return self;
+  };
+
+  /**
+   * Fetch resources
+   */
+  DQ.prototype._fetch = function(transforms){
+    var self = this;
+    var tableNames = _.pluck(self._tables, 'as');
+    var dfd = new DQ.Deferred();
+
+    self._fetchResources().then(function(data){
+      self._fetched = true;
+      self._resources = _.zipObject(tableNames, data);
+      self._runTransforms();
+      dfd.resolve(self);
+    });
+
+    return dfd.promise;
   };
 
   /**
@@ -428,7 +485,7 @@
     var self = this;
     var obj = (_.isString(serialized)) ? JSON.parse(serialized) : serialized;
     self._tables = obj.tables;
-    self._operations = obj.operations;
+    self._transforms = obj.transforms;
     return self;
   };
 
@@ -441,7 +498,7 @@
 
     var obj = {
       tables: self._tables,
-      operations: self._operations
+      transforms: self._transforms
     };
 
     return obj;
@@ -456,9 +513,10 @@
 
     self._fetchResources()
     .then(function(data){
+      self._fetched = true;
       self._resources = _.zipObject(tableNames, data);
-      self._runOps();
-      cb(self._result);
+      self._runTransforms();
+      cb(_.clone(self._result));
     });
 
     return self;

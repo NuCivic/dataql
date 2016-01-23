@@ -1,76 +1,68 @@
-Consolidate rows using regex or some euristics.
+
+// dql.truncate remain pointin to executable
+// dql._truncate remain pointing to serializable
+
+dql.register('truncate', {
+  serializable: function(resources, result, params){
+    return _.map(result, function(record){
+      return _.mapValues(record, function(value, key){
+        return (params.field === key) ? this.executable(params.field) : value ;
+      }, this);
+    }, this);
+  },
+  executable: function(field, dql) {
+    // Returns a pipeable version
+    return dql.queue({
+      transform: this,
+      field: field,
+    });
+  }
+});
+
+dql.truncate('field')
+
+// if it's syncronous then return process data else return a promise
+var dataql = dql
+  .data([])
+  .set('table_name')
+  .rename('old_name','new_name')
+  .join('field', 'value', '=') // = as default and optional > <
+  .limit(start, number_of_rows)
+  .sort('field', 'direction')
+  .sum('field', 'group_by', 'as')
+  .groupBy('field')
+  .cast('field', type)
+  .substr('field', start, end)
+  .avg('field', 'group_by', 'as') // as is optional
+  .percentage('field', 'group_by', 'as')  // as is optional
+  .max('field', 'group_by', 'as')
+  .min('field', 'group_by', 'as')
+  .count('field', 'group_by')
+  .capitalize('field')
+  .truncate('field')
+  .commit();
 
 
-crear una columna tomando los valores de N
+//
+var dataql = dql
+  .set('table_name')
+  .rename('old_name','new_name')
+  .join('field', 'value', '=') // = as default and optional > <
+  .limit(start, number_of_rows);
 
-select('year')
-.from(d)
-.columnFromVector({row: 1, columns: ['A 2014', 'A 2013', 'A 2012'], as: 'Year'})
-.execute()
+// Reusable queries
+// if those are backends then return a promise if not return the data
+dataql.transform({mycsv: []}, {mygdocs: []});
+dataql.transform({myothercsv: []}, {mygdocs2: []})
+dataql.transform({myanothercsv: []}, {mygdocs3: []})
 
-data > filtro1 > .. > report
-
-
-BACKEND JSON prices FROM "http://dadas.com/xml.json";
-BACKEND GDOCS schools FROM "http://drive.google.com/spreadsheet/ak23kf-dh29+21";
-BACKEND CSV district FROM "http://dkan.com/district.csv";
-
-TABLES prices, schools
-JOIN prices.id = schools.id
-JOIN district.id = district.id
-FILTER COND(schools.id = 20)
-RENAME schools.id, id
-DELETE ROW 1,2, RANGE(4,20), COND(
-DELETE COLUMN schools.name,2
-ADD COLUMN year FROM COLUMN_RANGE(1,20)
-AGGREGATE SUM(prices.price) AS price // This create a price column with the sum of each price by group
-AGGREGATE AVG(prices.price) AS priceAvg
-AGGREGATE MIN(prices.price) AS minimum
-AGGREGATE MAX(prices.price) AS maximum
-AGGREGATE PERCENTAGE(prices.price) AS percentage
-GROUP BY schools.id
-SORT BY id DESC
-LIMIT 0,10
+// Returns a serialized version of the query
+var query = dql.query();
 
 
+// Create transforms and apply to collections
+dql
+  .data(data) // load data. if array query is syncronous else returns a promise
+  .query(query) // set transformations queue
+  .commit(); // executes the query
 
-COND(schools.id=20) //condition to satisfy
-RANGE(row,0,20)
-
-// Set the sources array
-var t1 = {url: 'https://docs.google.com/spreadsheets/d/1UW1uOa7uoLZTC5M7NspVSWZeCUJJJUspY75GAIKzhAw', backend: 'gdocs'};
-var t2 = {url: 'http://demo.getdkan.com/sites/default/files/us_foreclosures_jan_2012_by_state_0.csv', backend: 'csv'};
-
-tables(t1,t2)
-
-op()
-
-// This is computed on the tmp table
-.join({table:'t1', where: {cmp: '=', left:'id', right: 'id'})
-.join({tables: [d1,d2], where: {cmp: '=', left:'d2.id', right: 'd3.id'})
-.where([{cmp:'=', right:1, left: 'id'}])
-
-// Operations performed on the results
-.rename({country:'pais'})
-.delete({rows:0, columns:'a'})
-
-
-// Iterate over each cell of the range and create a cell for te column year
-.add({type: 'column', name: 'year', from: { columnRange: [1,20] }})
-.add({type: 'row', from: { rowRange: [1,20] } })
-
-
-// Sort at the end
-.sort({field})
-.limit({start:0, numRows: 10})
-
-this.operations = [];
-this.resources = [];
-this.temporary = [];
-this.result = [];
-
-
-// Create predefine querys for most used resources (analytics, twitter, facebook, govdev)
-// Query templates
-
-Admin role can create querys with the query builder and users can choose from existing queries by linking their accounts.
