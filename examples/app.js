@@ -75,7 +75,6 @@ var t6 = {
 };
 
 tables(t6)
-  .set('foo')
   .commit(function (data) {
     console.log(data);
   });
