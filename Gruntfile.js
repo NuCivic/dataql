@@ -9,6 +9,7 @@ module.exports = function(grunt) {
     'src/lib/report.js',
     'src/lib/json.js',
     'src/lib/xlsx.js',
+    'src/lib/cartodb.js',
     'src/lib/papaparse.js',
     'src/dataql.aggregations.js',
     'src/dataql.utils.js',
