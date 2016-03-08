@@ -453,19 +453,19 @@
   /**
    * Fetch resources
    */
-  DQ.prototype._fetch = function(transforms){
-    var self = this;
-    var tableNames = _.pluck(self._tables, 'as');
-    var dfd = new DQ.Deferred();
-    self._fetchResources().then(function(data){
-      self._fetched = true;
-      self._resources = _.zipObject(tableNames, data);
-      self._runTransforms();
-      dfd.resolve(self);
-    });
-
-    return dfd.promise;
-  };
+//  DQ.prototype._fetch = function(transforms){
+//    var self = this;
+//    var tableNames = _.pluck(self._tables, 'as');
+//    var dfd = new DQ.Deferred();
+//    self._fetchResources().then(function(data){
+//      self._fetched = true;
+//      self._resources = _.zipObject(tableNames, data);
+//      self._runTransforms();
+//      dfd.resolve(self);
+//    });
+//
+//    return dfd.promise;
+//  };
 
   /**
    * Creates a serialized version
