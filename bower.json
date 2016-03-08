@@ -16,5 +16,5 @@
     "file-saver": "*",
     "js-xlsx": "~0.8.0",
     "promise-polyfill": "~2.1.0"
-  },
+  }
 }

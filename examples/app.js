@@ -1,3 +1,4 @@
+
 // Returns accesors
 'use strict';
 
@@ -65,6 +66,20 @@ var t5 = {
   as: 'json_example',
   path: 'result.records'
 };
+
+// cartodb backend example 1
+var t6 = {
+  backend: 'cartodb',
+  user: 'starsinmypockets',
+  as: 'cartodb_example',
+  table: 'public.congressional_districts_2015'
+};
+
+tables(t6)
+  .set('cartodb_example')
+  .commit(function (data) {
+    console.log(data);
+  });
 
 tables(t1)
   .rename('country', 'pais')

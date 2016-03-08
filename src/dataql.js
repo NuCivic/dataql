@@ -304,12 +304,12 @@
   DQ.prototype._fetchResources = function(){
     var self = this;
     var promises = [];
-
     _.each(self._tables, function(table){
       var backend = self._backendFromString(table.backend);
-
+      var thisPromise;
       if(!backend) throw new Error('Backend not found');
-      promises.push(backend.fetch(table));
+      thisPromise = backend.fetch(table);
+      promises.push(thisPromise);
     });
 
     return Promise.all(promises);
@@ -453,20 +453,19 @@
   /**
    * Fetch resources
    */
-  DQ.prototype._fetch = function(transforms){
-    var self = this;
-    var tableNames = _.pluck(self._tables, 'as');
-    var dfd = new DQ.Deferred();
-
-    self._fetchResources().then(function(data){
-      self._fetched = true;
-      self._resources = _.zipObject(tableNames, data);
-      self._runTransforms();
-      dfd.resolve(self);
-    });
-
-    return dfd.promise;
-  };
+//  DQ.prototype._fetch = function(transforms){
+//    var self = this;
+//    var tableNames = _.pluck(self._tables, 'as');
+//    var dfd = new DQ.Deferred();
+//    self._fetchResources().then(function(data){
+//      self._fetched = true;
+//      self._resources = _.zipObject(tableNames, data);
+//      self._runTransforms();
+//      dfd.resolve(self);
+//    });
+//
+//    return dfd.promise;
+//  };
 
   /**
    * Creates a serialized version
@@ -510,7 +509,6 @@
   DQ.prototype.commit = function(cb){
     var self = this;
     var tableNames = _.pluck(self._tables, 'as');
-
     self._fetchResources()
     .then(function(data){
       self._fetched = true;
