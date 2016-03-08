@@ -304,12 +304,14 @@
   DQ.prototype._fetchResources = function(){
     var self = this;
     var promises = [];
-
+    console.log('_fr', self);
     _.each(self._tables, function(table){
       var backend = self._backendFromString(table.backend);
-
+      var thisPromise;
       if(!backend) throw new Error('Backend not found');
-      promises.push(backend.fetch(table));
+      thisPromise = backend.fetch(table);
+      console.log('_fr2', thisPromise);
+      promises.push(thisPromise);
     });
 
     return Promise.all(promises);
@@ -454,14 +456,16 @@
    * Fetch resources
    */
   DQ.prototype._fetch = function(transforms){
+    console.log('_f-0');
     var self = this;
     var tableNames = _.pluck(self._tables, 'as');
     var dfd = new DQ.Deferred();
-
+    console.log('_f-1');
     self._fetchResources().then(function(data){
       self._fetched = true;
       self._resources = _.zipObject(tableNames, data);
       self._runTransforms();
+      console.log('_f-R1',self);
       dfd.resolve(self);
     });
 
@@ -510,7 +514,7 @@
   DQ.prototype.commit = function(cb){
     var self = this;
     var tableNames = _.pluck(self._tables, 'as');
-
+    console.log('cm', self);
     self._fetchResources()
     .then(function(data){
       self._fetched = true;
